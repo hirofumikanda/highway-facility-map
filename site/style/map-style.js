@@ -42,21 +42,26 @@ const ROUTE_CATEGORY_WIDTH_MULTIPLIER = [
 
 // MapLibreの式言語では `["zoom"]` はstep/interpolateの直接の入力としてのみ
 // 使用できるため、`["*", <interpolate式>, <match式>]` のような入れ子はできない。
-// そのためinterpolateの各ストップの出力値側でカテゴリ倍率を乗算する。
-function widthByZoomAndCategory(stops, casingMultiplier = 1) {
+// そのためinterpolateの各ストップの出力値側で地物属性ベースの倍率を乗算する。
+// 路線の線幅（ズーム×路線種別区分）・地点の半径（ズーム×接合部種別）の
+// 両方で使う。
+function zoomInterpolateWithMultiplier(stops, multiplierExpression, scale = 1) {
   const expression = ["interpolate", ["linear"], ["zoom"]];
-  for (const [zoom, baseWidth] of stops) {
-    expression.push(zoom, [
-      "*",
-      baseWidth * casingMultiplier,
-      ROUTE_CATEGORY_WIDTH_MULTIPLIER,
-    ]);
+  for (const [zoom, base] of stops) {
+    expression.push(zoom, ["*", base * scale, multiplierExpression]);
   }
   return expression;
 }
 
-const FILL_WIDTH = widthByZoomAndCategory(LINE_WIDTH_STOPS_BY_ZOOM);
-const CASING_WIDTH = widthByZoomAndCategory(LINE_WIDTH_STOPS_BY_ZOOM, 1.7);
+const FILL_WIDTH = zoomInterpolateWithMultiplier(
+  LINE_WIDTH_STOPS_BY_ZOOM,
+  ROUTE_CATEGORY_WIDTH_MULTIPLIER,
+);
+const CASING_WIDTH = zoomInterpolateWithMultiplier(
+  LINE_WIDTH_STOPS_BY_ZOOM,
+  ROUTE_CATEGORY_WIDTH_MULTIPLIER,
+  1.7,
+);
 
 // 路線種別区分に応じたケーシング色・塗り色。高速自動車国道系統は濃いオレンジ、
 // 指定都市高速道路・その他は控えめな配色にする（design.md 決定7）。
@@ -103,6 +108,51 @@ const LINE_OPACITY_BY_ZOOM = [
   0.85,
   12,
   1,
+];
+
+// ズームレベルに応じた地点マーカーの基準半径（Googleマップのピン/POIマーカーを
+// 参考に、ズームが上がるほど大きく表示する）。
+const POINT_RADIUS_STOPS_BY_ZOOM = [
+  [8, 4],
+  [10, 4.5],
+  [12, 5],
+  [14, 6],
+];
+
+// 接合部種別（N06_019）に応じた半径の倍率。ジャンクション（3）はやや大きめ、
+// 一般インターチェンジ（1）は標準、スマートインターチェンジ（2）はIC系だが
+// 区別できるサイズ、その他（4）は控えめにする（design.md 決定9）。
+const POINT_TYPE_RADIUS_MULTIPLIER = [
+  "match",
+  ["get", "point_type"],
+  "3",
+  1.3,
+  "1",
+  1,
+  "2",
+  0.9,
+  0.75,
+];
+
+const POINT_RADIUS = zoomInterpolateWithMultiplier(
+  POINT_RADIUS_STOPS_BY_ZOOM,
+  POINT_TYPE_RADIUS_MULTIPLIER,
+);
+
+// 接合部種別に応じたマーカー配色。ジャンクションは目立つ配色（赤系）、
+// 一般インターチェンジはGoogleマップの標準ピン配色（青）、スマートIC は
+// IC系だが区別できる配色（ティール）、その他は控えめな配色（グレー）にする
+// （design.md 決定9）。
+const POINT_COLOR = [
+  "match",
+  ["get", "point_type"],
+  "3",
+  "#d93025",
+  "1",
+  "#4285f4",
+  "2",
+  "#00897b",
+  "#9aa0a6",
 ];
 
 export const mapStyle = {
@@ -176,8 +226,31 @@ export const mapStyle = {
       source: "points",
       "source-layer": "points",
       paint: {
-        "circle-radius": 3,
-        "circle-color": "#1a73e8",
+        "circle-radius": POINT_RADIUS,
+        "circle-color": POINT_COLOR,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 8, 1, 14, 1.5],
+      },
+    },
+    {
+      id: "point-labels",
+      type: "symbol",
+      source: "points",
+      "source-layer": "points",
+      layout: {
+        "text-field": ["get", "point_name"],
+        "text-font": ["Klokantech Noto Sans CJK Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 8, 10, 14, 13],
+        // マーカー（円）の下にラベルを配置し、重ならないようにする
+        "text-anchor": "top",
+        "text-offset": [0, 0.6],
+        "text-allow-overlap": false,
+        "text-optional": true,
+      },
+      paint: {
+        "text-color": "#202124",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2,
       },
     },
   ],
