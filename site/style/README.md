@@ -1,6 +1,9 @@
-# MapLibre GL JS スタイル定義（未実装）
+# MapLibre GL JS スタイル定義
 
-路線レイヤー・地点レイヤーのMapLibreスタイル定義をここに実装する。
+`map-style.js` は、`site/tiles/` のPMTiles（路線・地点）をベクトルタイル
+ソースとして登録するMapLibreスタイル定義（`site/main.js` から読み込まれる）。
+現状は地物が表示されることを確認できる最小限の配色のみで、以下のIssueで
+詳細なスタイルに拡張する:
 
 - 路線スタイル（国土地理院 最適化ベクトルタイルを参考にしたケーシング＋塗り、
   路線名のライン沿い表示）: OpenSpec Change `highway-facility-map`、
