@@ -5,3 +5,5 @@
 
 - `lines.current.geojson` — `pipeline/preprocess/filter_lines.py` が出力する現況路線
 - `points.current.geojson` — `pipeline/preprocess/filter_points.py` が出力する現況地点
+- `lines.pmtiles` — `pipeline/tilegen/build_lines.sh` が出力する路線タイル（z4-14）
+- `points.pmtiles` — `pipeline/tilegen/build_points.sh` が出力する地点タイル（z8-14）
