@@ -4,6 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>高速道路ネットワークマップ</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.2.0/dist/maplibre-gl.css"
+  />
+  <!--
+    pmtilesのESMビルド（dist/esm/index.js）は依存パッケージ"fflate"への
+    裸のimport指定を含み、バンドラなしのブラウザでは解決できないため、
+    依存関係を内包したグローバルバンドル（dist/pmtiles.js）を通常の
+    scriptタグで読み込む（main.jsからは window.pmtiles として参照する）。
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/pmtiles@4.4.1/dist/pmtiles.js"></script>
   <style>
     html, body { height: 100%; margin: 0; }
     #map { position: absolute; inset: 0; }
@@ -11,9 +22,6 @@
 </head>
 <body>
   <div id="map"></div>
-  <!--
-    MapLibre GL JS の読み込みとPMTilesソースの登録、地図の初期化は
-    GitHub Issue #4（tasks.md 5.1〜5.3）で実装する。
-  -->
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

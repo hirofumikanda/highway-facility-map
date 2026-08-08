@@ -48,11 +48,11 @@
 
 ## 5. MapLibre GL JS 地図サイトの基本実装（Issue: #4）
 
-- [ ] 5.1 MapLibre GL JS本体とPMTiles protocolプラグインを静的サイトに読み込み
+- [x] 5.1 MapLibre GL JS本体とPMTiles protocolプラグインを静的サイトに読み込み
       構成する（CDN配信のビルド済みバンドルを利用）
-- [ ] 5.2 PMTiles protocolを登録し、路線用・地点用PMTilesをベクトルタイル
+- [x] 5.2 PMTiles protocolを登録し、路線用・地点用PMTilesをベクトルタイル
       ソースとして追加するMapLibreスタイル定義（背景レイヤーなし）を実装する
-- [ ] 5.3 地図の初期表示範囲・初期ズームなど基本的な地図初期化コードを実装する
+- [x] 5.3 地図の初期表示範囲・初期ズームなど基本的な地図初期化コードを実装する
 
 ## 6. 路線スタイルの実装（Issue: #5）
 
