@@ -21,11 +21,20 @@
 （MapLibreは既定では表意文字をクライアントのシステムフォントでローカル描画
 するため、CJKフォント未インストール環境では文字化けする）。
 
-## 地点スタイル（未実装: Issue #6）
+## 地点スタイル（実装済み: Issue #6）
 
-現状は地物が表示されることを確認できる最小限の配色（`circle`レイヤー）のみ。
-Googleマップのピン/POIマーカー表現を参考にした種別ごとの配色・形状は
-tasks.md タスク番号 7.1〜7.3（GitHub Issue #6）で実装する。
+Googleマップのピン/POIマーカー表現を参考に、地点は`circle`レイヤー
+（`points`）で描画する。`circle-radius`はズームレベル（`interpolate`）と
+接合部種別`point_type`＝`N06_019`（`match`）の両方に応じて変化し、
+ジャンクション（3）はやや大きめの目立つ赤、一般インターチェンジ（1）は
+標準サイズの青、スマートインターチェンジ（2）はIC系だが区別できるティール、
+その他（4）は控えめなグレーにする（design.md 決定9）。マーカーのminzoom
+制御はタイル生成時点で種別ごとに設定済みのため、レイヤー側に追加のズーム式は
+不要で、そのまま重要度順の段階的表示が実現される。
+
+地点名（`point_name`＝`N06_018`）は`point-labels`という`symbol`レイヤーで
+表示する。`text-anchor: "top"`と`text-offset: [0, 0.6]`でマーカーの下に
+配置し、マーカーとラベルが重ならないようにしている。
 
 - OpenSpec Change: `highway-facility-map`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-map-viewer/spec.md`
