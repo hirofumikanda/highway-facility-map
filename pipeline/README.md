@@ -9,7 +9,8 @@
 - `preprocess/` — 現況データ（供用期間終了年が`9999`）への絞り込み・属性整形スクリプト
 - `tilegen/` — tippecanoeによるMVT生成・PMTiles変換・`site/tiles/`への配置スクリプト
 - `output/` — 前処理済みGeoJSONやtippecanoeの中間生成物の出力先。生成物はGit管理対象外
-  （`.gitignore`の`*.geojson`/`*.mbtiles`パターンで除外）
+  （`.gitignore`の`*.geojson`/`*.mbtiles`パターン、および`/pipeline/output/*.pmtiles`
+  パターンで除外）。`deploy.sh`が配置する`site/tiles/*.pmtiles`はGit管理対象
 
 ## 前提ツール
 
