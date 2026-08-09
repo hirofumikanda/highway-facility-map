@@ -167,8 +167,38 @@ export const mapStyle = {
       type: "vector",
       url: `pmtiles://${TILES_BASE_URL}points.pmtiles`,
     },
+    prefectures: {
+      type: "vector",
+      url: `pmtiles://${TILES_BASE_URL}prefectures.pmtiles`,
+    },
   },
   layers: [
+    // 都道府県境界は地理院地図の白地図（淡い単色塗り・控えめな行政界線・
+    // 注記なし）を参考にした背景レイヤーとして、高速道路の路線・地点
+    // レイヤーより下（配列の先頭）に配置する（design.md 決定5）。
+    {
+      id: "prefectures-fill",
+      type: "fill",
+      source: "prefectures",
+      "source-layer": "prefectures",
+      paint: {
+        "fill-color": "#f5f5f2",
+      },
+    },
+    {
+      id: "prefectures-boundary",
+      type: "line",
+      source: "prefectures",
+      "source-layer": "prefectures",
+      layout: {
+        "line-cap": "round",
+        "line-join": "round",
+      },
+      paint: {
+        "line-color": "#c9c5bb",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 8, 1],
+      },
+    },
     {
       id: "lines-casing",
       type: "line",
