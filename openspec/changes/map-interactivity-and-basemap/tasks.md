@@ -14,9 +14,9 @@
 
 ## 3. ナビゲーションコントロール・URLハッシュ同期（Issue: #18）
 
-- [ ] 3.1 `site/main.js` の `Map` コンストラクタに `hash: true` を追加する
-- [ ] 3.2 `maplibre-gl` から `NavigationControl` をインポートし、`map.addControl(new NavigationControl(), "top-right")` を追加する
-- [ ] 3.3 ブラウザで地図をパン・ズームした際にURLハッシュが更新されること、ハッシュ付きURLを開いた際にその状態から初期化されることを確認する
+- [x] 3.1 `site/main.js` の `Map` コンストラクタに `hash: true` を追加する
+- [x] 3.2 `maplibre-gl` から `NavigationControl` をインポートし、`map.addControl(new NavigationControl(), "top-right")` を追加する
+- [x] 3.3 ブラウザで地図をパン・ズームした際にURLハッシュが更新されること、ハッシュ付きURLを開いた際にその状態から初期化されることを確認する
 
 ## 4. 地点クリック時のポップアップ（Issue: #19）
 
