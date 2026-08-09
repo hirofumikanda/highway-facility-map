@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 "$SCRIPT_DIR/preprocess/run.sh"
 "$SCRIPT_DIR/tilegen/build_lines.sh"
 "$SCRIPT_DIR/tilegen/build_points.sh"
+"$SCRIPT_DIR/tilegen/build_prefectures.sh"
 "$SCRIPT_DIR/tilegen/deploy.sh"
 python3 "$SCRIPT_DIR/tilegen/verify_tiles.py"
 

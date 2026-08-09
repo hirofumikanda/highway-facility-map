@@ -9,13 +9,15 @@
          現況地点数（2,384件）と一致する
   - 4.4: 路線タイルはズーム4〜14の各レベルで生成され、
          route_name/route_category属性を保持する
+  - 都道府県境界タイルはズーム4〜8の各レベルで生成され、
+    N03_001（都道府県名）属性を保持する
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map
-tasks.md: 4.1, 4.2, 4.3, 4.4
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）
 """
 import json
 import subprocess
@@ -25,9 +27,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LINES_PMTILES = REPO_ROOT / "pipeline" / "output" / "lines.pmtiles"
 POINTS_PMTILES = REPO_ROOT / "pipeline" / "output" / "points.pmtiles"
+PREFECTURES_PMTILES = REPO_ROOT / "pipeline" / "output" / "prefectures.pmtiles"
 
 EXPECTED_POINT_COUNT = 2384
 LINE_MIN_ZOOM, LINE_MAX_ZOOM = 4, 14
+PREFECTURE_MIN_ZOOM, PREFECTURE_MAX_ZOOM = 4, 8
 
 # ズームごとに収録されるべき地点種別コードの集合
 # （3: ジャンクション, 1: 一般IC, 2: スマートIC, 4: その他の接合部）
@@ -101,11 +105,27 @@ def verify_lines(ok_flags):
         )
 
 
+def verify_prefectures(ok_flags):
+    for zoom in range(PREFECTURE_MIN_ZOOM, PREFECTURE_MAX_ZOOM + 1):
+        features = decode_zoom(PREFECTURES_PMTILES, zoom)
+        check(ok_flags, f"z{zoom}の都道府県境界タイルに地物が存在する（{len(features)}件）", len(features) > 0, True)
+
+        missing_attrs = sum(
+            1 for f in features if "N03_001" not in f["properties"]
+        )
+        check(
+            ok_flags,
+            f"z{zoom}でN03_001属性が欠落している件数",
+            missing_attrs,
+            0,
+        )
+
+
 def main():
-    if not LINES_PMTILES.exists() or not POINTS_PMTILES.exists():
+    if not LINES_PMTILES.exists() or not POINTS_PMTILES.exists() or not PREFECTURES_PMTILES.exists():
         print(
-            "PMTilesが見つかりません。先に build_lines.sh / build_points.sh を"
-            "実行してください。",
+            "PMTilesが見つかりません。先に build_lines.sh / build_points.sh / "
+            "build_prefectures.sh を実行してください。",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -113,6 +133,7 @@ def main():
     ok_flags = []
     verify_points(ok_flags)
     verify_lines(ok_flags)
+    verify_prefectures(ok_flags)
 
     if not all(ok_flags):
         print("検証に失敗した項目があります。", file=sys.stderr)
