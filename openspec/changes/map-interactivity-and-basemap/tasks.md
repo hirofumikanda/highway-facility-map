@@ -1,10 +1,10 @@
 ## 1. 都道府県境界PMTiles生成パイプライン（Issue: #16）
 
-- [ ] 1.1 `pipeline/tilegen/build_prefectures.sh` を作成し、`geojson/N03-20260101_prefecture.geojson` を入力にtippecanoeでPMTilesを生成する（`--minimum-zoom=4 --maximum-zoom=8 --layer=prefectures --include=N03_001 --include=N03_007 --coalesce --detect-shared-borders`、出力先 `pipeline/output/prefectures.pmtiles`）
-- [ ] 1.2 `pipeline/tilegen/deploy.sh` を拡張し、`prefectures.pmtiles` も `site/tiles/` に配置する
-- [ ] 1.3 `pipeline/build.sh` に `build_prefectures.sh` の呼び出しを追加する（`build_lines.sh`・`build_points.sh` と同様の位置づけ）
-- [ ] 1.4 `pipeline/tilegen/verify_tiles.py` に都道府県境界タイルの検証を追加する（z4〜z8で地物が生成されること、`N03_001`属性が保持されていること）
-- [ ] 1.5 `pipeline/build.sh` を実行し、`prefectures.pmtiles` が生成・配置され、検証が通ることを確認する
+- [x] 1.1 `pipeline/tilegen/build_prefectures.sh` を作成し、`geojson/N03-20260101_prefecture.geojson` を入力にtippecanoeでPMTilesを生成する（`--minimum-zoom=4 --maximum-zoom=8 --layer=prefectures --include=N03_001 --include=N03_007 --coalesce --detect-shared-borders`、出力先 `pipeline/output/prefectures.pmtiles`）
+- [x] 1.2 `pipeline/tilegen/deploy.sh` を拡張し、`prefectures.pmtiles` も `site/tiles/` に配置する
+- [x] 1.3 `pipeline/build.sh` に `build_prefectures.sh` の呼び出しを追加する（`build_lines.sh`・`build_points.sh` と同様の位置づけ）
+- [x] 1.4 `pipeline/tilegen/verify_tiles.py` に都道府県境界タイルの検証を追加する（z4〜z8で地物が生成されること、`N03_001`属性が保持されていること）
+- [x] 1.5 `pipeline/build.sh` を実行し、`prefectures.pmtiles` が生成・配置され、検証が通ることを確認する
 
 ## 2. 背景レイヤーのスタイル・地図への統合（Issue: #17）
 
