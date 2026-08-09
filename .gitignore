@@ -1,3 +1,4 @@
 *.geojson
 *.mbtiles
+*.xml
 /pipeline/output/*.pmtiles
