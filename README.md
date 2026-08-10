@@ -19,7 +19,8 @@
    $ ./pipeline/check-tools.sh
    ```
 2. 国土数値情報の元データ（`N06-25_HighwaySection.geojson` /
-   `N06-25_Joint.geojson`）を `geojson/` に配置する（Git管理対象外）。
+   `N06-25_Joint.geojson` / `N03-20260101_prefecture.geojson`）を `geojson/`
+   に配置する（Git管理対象外）。
 3. 前処理→タイル生成→`site/tiles/`への配置→検証までを1コマンドで実行する
    ```
    $ ./pipeline/build.sh

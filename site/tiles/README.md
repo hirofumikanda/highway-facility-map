@@ -7,6 +7,7 @@
 
 - `lines.pmtiles` — 路線レイヤー（z4-14）
 - `points.pmtiles` — 地点レイヤー（z8-14）
+- `prefectures.pmtiles` — 都道府県境界レイヤー（z4-8、背景レイヤー用）
 
-- OpenSpec Change: `highway-facility-map`
-- tasks.md タスク番号: 3.4（GitHub Issue #3）
+- OpenSpec Change: `highway-facility-map`, `map-interactivity-and-basemap`
+- tasks.md タスク番号: 3.4（GitHub Issue #3）、1.2（GitHub Issue #16）
