@@ -20,6 +20,16 @@ const POINT_TYPE_LABELS = {
   4: "その他の接合部",
 };
 
+// 路線種別区分（route_category）を人が読める種別名に変換する（design.md 決定2）。
+const ROUTE_CATEGORY_LABELS = {
+  1: "高速自動車国道",
+  2: "高速自動車国道に並行する自専道",
+  3: "一般国道の自専道",
+  4: "本州四国連絡高速道路",
+  5: "指定都市高速道路",
+  6: "その他",
+};
+
 // pmtilesは index.html 内の通常のscriptタグ（依存関係を内包したグローバル
 // バンドル）で読み込まれ、window.pmtiles として参照できる。
 const protocol = new window.pmtiles.Protocol();
@@ -44,6 +54,20 @@ const map = new Map({
 
 map.addControl(new NavigationControl(), "top-right");
 
+// 現在表示中のポップアップ（路線・地点で共有）。新しいポップアップを開く前に
+// 既存のものを閉じ、路線・地点いずれにも該当しないクリックでは既存の
+// ポップアップを閉じるだけにする。
+let activePopup = null;
+
+function showPopup(lngLat, container) {
+  if (activePopup) {
+    activePopup.remove();
+  }
+  // innerHTMLへのプロパティ直接埋め込みは行わず、DOM APIでテキストノード
+  // として組み立てた要素をポップアップに渡す（design.md 決定3）。
+  activePopup = new Popup().setLngLat(lngLat).setDOMContent(container).addTo(map);
+}
+
 // 地点（IC・JCT等）のクリック時に、地点名・種別ラベルを表示するポップアップ
 // を出す。`points`レイヤーのみをリッスンするため、地点以外のクリックでは
 // 発火しない（design.md 決定3）。
@@ -63,9 +87,7 @@ map.on("click", "points", (event) => {
   typeEl.textContent = POINT_TYPE_LABELS[point_type] ?? point_type;
   container.append(nameEl, typeEl);
 
-  // innerHTMLへのプロパティ直接埋め込みは行わず、DOM APIでテキストノード
-  // として組み立てた要素をポップアップに渡す（design.md 決定3）。
-  new Popup().setLngLat(coordinates).setDOMContent(container).addTo(map);
+  showPopup(coordinates, container);
 });
 
 // 地点マーカーへのホバー時にカーソルをpointerに変更する。
@@ -74,4 +96,56 @@ map.on("mouseenter", "points", () => {
 });
 map.on("mouseleave", "points", () => {
   map.getCanvas().style.cursor = "";
+});
+
+// 路線のクリック時に、路線名・路線種別名・車線数を表示するポップアップを出す。
+// 塗り部分（`lines-fill`、判定領域として最も広い）のみをリッスンし、
+// `lines-casing`には登録しない（同一地物で二重発火するため、design.md 決定2）。
+map.on("click", "lines-fill", (event) => {
+  const feature = event.features?.[0];
+  if (!feature) {
+    return;
+  }
+
+  // 地点（IC・JCT等）は路線ジオメトリの頂点上に位置するため、地点マーカーの
+  // クリックはこのハンドラにも同時にヒットする。地点ポップアップを優先し、
+  // このハンドラでは何もしない。
+  const pointHit = map.queryRenderedFeatures(event.point, { layers: ["points"] });
+  if (pointHit.length > 0) {
+    return;
+  }
+
+  const { route_name, route_category, lane_count } = feature.properties;
+
+  const container = document.createElement("div");
+  const nameEl = document.createElement("div");
+  nameEl.textContent = route_name;
+  const categoryEl = document.createElement("div");
+  categoryEl.textContent = ROUTE_CATEGORY_LABELS[route_category] ?? route_category;
+  const laneEl = document.createElement("div");
+  laneEl.textContent = `車線数: ${lane_count}`;
+  container.append(nameEl, categoryEl, laneEl);
+
+  showPopup(event.lngLat, container);
+});
+
+// 路線へのホバー時にカーソルをpointerに変更する。
+map.on("mouseenter", "lines-fill", () => {
+  map.getCanvas().style.cursor = "pointer";
+});
+map.on("mouseleave", "lines-fill", () => {
+  map.getCanvas().style.cursor = "";
+});
+
+// 路線・地点いずれの地物にも該当しない位置をクリックした場合、表示中の
+// ポップアップがあれば閉じる。路線・地点それぞれのハンドラは対象地物が
+// ある場合のみ発火するため、こちらは常に発火するリスナーとして別途登録する。
+map.on("click", (event) => {
+  const hits = map.queryRenderedFeatures(event.point, {
+    layers: ["points", "lines-fill"],
+  });
+  if (hits.length === 0 && activePopup) {
+    activePopup.remove();
+    activePopup = null;
+  }
 });
