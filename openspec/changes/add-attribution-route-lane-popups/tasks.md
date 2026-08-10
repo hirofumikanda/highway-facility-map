@@ -21,11 +21,11 @@
 
 ## 3. タイル生成・配置（Issue: #30）
 
-- [ ] 3.1 `./pipeline/build.sh`を実行し、`lane_count`・`lane_counts`属性を
+- [x] 3.1 `./pipeline/build.sh`を実行し、`lane_count`・`lane_counts`属性を
       含む`lines.pmtiles`・`points.pmtiles`を再生成する
-- [ ] 3.2 `pipeline/tilegen/verify_tiles.py`で新属性がタイル内に保持されて
+- [x] 3.2 `pipeline/tilegen/verify_tiles.py`で新属性がタイル内に保持されて
       いることを確認する
-- [ ] 3.3 再生成した`site/tiles/lines.pmtiles`・`points.pmtiles`を配置する
+- [x] 3.3 再生成した`site/tiles/lines.pmtiles`・`points.pmtiles`を配置する
 
 ## 4. サイト: データ出典（attribution）表示（Issue: #31）
 

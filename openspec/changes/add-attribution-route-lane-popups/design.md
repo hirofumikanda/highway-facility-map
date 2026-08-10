@@ -82,6 +82,13 @@ Shapely（新規依存追加）でライン地物ごとにジオメトリを構�
 地点ポップアップに「車線数: 2, 4」のようにカンマ区切りで表示する（`lane_counts`
 が空の場合は当該行を表示しない）。
 
+### 決定6: MVT内での`lane_counts`のエンコーディング
+MVT（Mapbox Vector Tile）仕様は配列型のfeature属性をサポートしないため、
+tippecanoeは`lane_counts`配列をJSON文字列（例: `"[2, 4]"`、空配列は`"[]"`）
+としてタイルにエンコードする（`lane_count`は整数値なのでそのまま数値として
+保持される）。`site/main.js`側で地点クリック時に`JSON.parse(feature.properties
+.lane_counts)`でパースしてから表示に使う必要がある（タスク6.1で対応）。
+
 ## Risks / Trade-offs
 
 - [Risk] 頂点一致判定の閾値が実データの座標誤差と合わず、一部地点で接続路線が
