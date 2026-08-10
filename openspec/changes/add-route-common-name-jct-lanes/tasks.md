@@ -30,9 +30,9 @@
 
 ## 4. パイプライン前処理の実行確認（Issue: #45）
 
-- [ ] 4.1 `pipeline/preprocess/run.sh`を実行し、`common_name`・`route_number`・
+- [x] 4.1 `pipeline/preprocess/run.sh`を実行し、`common_name`・`route_number`・
       `lane_counts`（重複を含む）が期待通り付与されることを確認する
-- [ ] 4.2 車線数が同じ複数路線が接続する既知のJCT（例：主要JCTを1件以上）で、
+- [x] 4.2 車線数が同じ複数路線が接続する既知のJCT（例：主要JCTを1件以上）で、
       `lane_counts`が重複値を含む配列になっていることを個別に確認する
 
 ## 5. タイル生成・配置（Issue: #46）
