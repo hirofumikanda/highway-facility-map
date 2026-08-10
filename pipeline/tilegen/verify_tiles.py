@@ -12,13 +12,15 @@
   - 都道府県境界タイルはズーム4〜8の各レベルで生成され、
     N03_001（都道府県名）属性を保持する
   - 地点タイルはlane_counts属性を保持する
+  - 路線タイルは、通称名・路線番号（common_name/route_number）が付与された
+    地物について、z14でそれらの属性を保持する
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map, map-interactivity-and-basemap
-tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）
 """
 import json
 import subprocess
@@ -124,6 +126,21 @@ def verify_lines(ok_flags):
             missing_lane_count,
             0,
         )
+
+        common_name_count = sum(
+            1 for f in features if "common_name" in f["properties"]
+        )
+        print(
+            f"[INFO] z{zoom}でcommon_name/route_number属性を保持する路線地物数: "
+            f"{common_name_count}"
+        )
+        if zoom == LINE_MAX_ZOOM:
+            check(
+                ok_flags,
+                "z14でcommon_name/route_number属性を保持する路線地物が存在する",
+                common_name_count > 0,
+                True,
+            )
 
 
 def verify_prefectures(ok_flags):
