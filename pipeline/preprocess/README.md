@@ -3,7 +3,16 @@
 `geojson/N06-25_HighwaySection.geojson` / `geojson/N06-25_Joint.geojson` から
 現況（供用期間終了年が`9999`）の地物のみを抽出し、タイル生成用のGeoJSONを
 `../output/` に書き出す。地点データには、接合部種別（`N06_019`）に基づく重要度
-ティアとtippecanoe用`minzoom`プロパティも付与する。
+ティアとtippecanoe用`minzoom`プロパティも付与する。また、地点座標とライン地物の
+頂点一致判定により、各地点に空間的に接続する路線の車線数（`lane_counts`）を
+付与する。
+
+## 依存関係
+
+- Python 3
+- [Shapely](https://shapely.readthedocs.io/) — `filter_points.py`が地点と路線の
+  空間的な接続判定（頂点一致判定）に使用する。`pip install shapely`（Debian/Ubuntu
+  では`apt install python3-shapely`でも可）でインストールする。
 
 ## 実行方法
 
@@ -21,11 +30,14 @@ $ ./pipeline/preprocess/run.sh
   `route_category`（路線種別区分）・`lane_count`（車線数、`N06_010`を整数として
   保持）を保持した `../output/lines.current.geojson` を書き出す
 - `filter_points.py` — 現況地点を抽出し、`point_name`（地点名）・
-  `point_type`（接合部種別コード）を保持しつつ、種別ごとのtippecanoe
-  `minzoom`（ジャンクション=8 / 一般IC=10 / スマートIC=12 / その他=14）を
-  付与した `../output/points.current.geojson` を書き出す
-- `verify_counts.py` — 上記2ファイルの件数・内訳・minzoom付与が期待通りで
-  あることを検証する
+  `point_type`（接合部種別コード）・`lane_counts`（地点座標とライン地物の頂点
+  一致判定により空間的に接続すると判定した路線の`lane_count`を重複排除・昇順
+  ソートした配列）を保持しつつ、種別ごとのtippecanoe`minzoom`（ジャンクション=8
+  / 一般IC=10 / スマートIC=12 / その他=14）を付与した
+  `../output/points.current.geojson` を書き出す
+- `verify_counts.py` — 上記2ファイルの件数・内訳・minzoom付与・`lane_count`/
+  `lane_counts`属性の付与が期待通りであることを検証し、`lane_counts`が空になる
+  地点数を報告する
 
 ## 出力
 

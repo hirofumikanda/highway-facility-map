@@ -6,17 +6,17 @@
 
 ## 2. パイプライン前処理: 地点への接続路線車線数の付与（Issue: #29）
 
-- [ ] 2.1 前処理の依存関係にShapelyを追加し、`check-tools.sh`または
+- [x] 2.1 前処理の依存関係にShapelyを追加し、`check-tools.sh`または
       `pipeline/preprocess/README.md`に依存追加を明記する
-- [ ] 2.2 `pipeline/preprocess/filter_points.py`で`lines.current.geojson`を
+- [x] 2.2 `pipeline/preprocess/filter_points.py`で`lines.current.geojson`を
       読み込み、各地点座標とライン地物の頂点一致判定（design.md 決定4の閾値）
       により接続路線を判定するロジックを実装する
-- [ ] 2.3 判定した接続路線の`lane_count`を重複排除・昇順ソートし、地点属性
+- [x] 2.3 判定した接続路線の`lane_count`を重複排除・昇順ソートし、地点属性
       `lane_counts`（配列）として付与する
-- [ ] 2.4 `pipeline/preprocess/verify_counts.py`に、`lane_count`・
+- [x] 2.4 `pipeline/preprocess/verify_counts.py`に、`lane_count`・
       `lane_counts`属性の存在検証と、`lane_counts`が空になる地点件数の報告を
       追加する
-- [ ] 2.5 `pipeline/preprocess/run.sh`を実行し、新属性が期待通り付与される
+- [x] 2.5 `pipeline/preprocess/run.sh`を実行し、新属性が期待通り付与される
       ことを確認する
 
 ## 3. タイル生成・配置（Issue: #30）
