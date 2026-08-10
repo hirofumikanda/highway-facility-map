@@ -18,8 +18,8 @@ $ ./pipeline/preprocess/run.sh
 ## スクリプト
 
 - `filter_lines.py` — 現況路線を抽出し、`route_name`（路線名）・
-  `route_category`（路線種別区分）のみを保持した
-  `../output/lines.current.geojson` を書き出す
+  `route_category`（路線種別区分）・`lane_count`（車線数、`N06_010`を整数として
+  保持）を保持した `../output/lines.current.geojson` を書き出す
 - `filter_points.py` — 現況地点を抽出し、`point_name`（地点名）・
   `point_type`（接合部種別コード）を保持しつつ、種別ごとのtippecanoe
   `minzoom`（ジャンクション=8 / 一般IC=10 / スマートIC=12 / その他=14）を

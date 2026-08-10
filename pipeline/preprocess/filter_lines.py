@@ -3,8 +3,8 @@
 
 `geojson/N06-25_HighwaySection.geojson` から供用期間終了年（`N06_003`）が
 `9999`（現況として有効）の地物のみを抽出し、スタイリング／ラベル表示に必要な
-属性（路線名・路線種別区分）のみを残した `pipeline/output/lines.current.geojson`
-を書き出す。
+属性（路線名・路線種別区分・車線数）のみを残した
+`pipeline/output/lines.current.geojson` を書き出す。
 
 OpenSpec Change: highway-facility-map
 tasks.md: 2.1, 2.2
@@ -32,6 +32,7 @@ def filter_current_lines(source):
                 "properties": {
                     "route_name": props.get("N06_007"),
                     "route_category": props.get("N06_008"),
+                    "lane_count": int(props.get("N06_010")),
                 },
             }
         )
