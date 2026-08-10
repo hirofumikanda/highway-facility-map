@@ -242,7 +242,7 @@ export const mapStyle = {
       layout: {
         "symbol-placement": "line",
         "symbol-spacing": 250,
-        "text-field": ["get", "route_name"],
+        "text-field": ["coalesce", ["get", "common_name"], ["get", "route_name"]],
         "text-font": ["Klokantech Noto Sans CJK Regular"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 8, 10, 14, 14],
         "text-letter-spacing": 0.05,

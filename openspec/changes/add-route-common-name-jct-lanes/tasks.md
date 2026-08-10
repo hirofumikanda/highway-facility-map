@@ -45,7 +45,7 @@
 
 ## 6. サイト: 路線ラベルの通称名優先表示（Issue: #47）
 
-- [ ] 6.1 `site/style/map-style.js`の`route-labels`レイヤーの`text-field`を
+- [x] 6.1 `site/style/map-style.js`の`route-labels`レイヤーの`text-field`を
       `["coalesce", ["get", "common_name"], ["get", "route_name"]]`に変更する
 
 ## 7. サイト: 路線ポップアップの通称名・路線番号表示（Issue: #48）
