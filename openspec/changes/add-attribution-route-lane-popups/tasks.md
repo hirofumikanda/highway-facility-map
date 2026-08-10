@@ -1,8 +1,8 @@
 ## 1. パイプライン前処理: 路線の車線数属性（Issue: #28）
 
-- [ ] 1.1 `pipeline/preprocess/filter_lines.py`の出力属性に`lane_count`
+- [x] 1.1 `pipeline/preprocess/filter_lines.py`の出力属性に`lane_count`
       （`N06_010`を整数として保持）を追加する
-- [ ] 1.2 `pipeline/preprocess/README.md`の出力属性説明を更新する
+- [x] 1.2 `pipeline/preprocess/README.md`の出力属性説明を更新する
 
 ## 2. パイプライン前処理: 地点への接続路線車線数の付与（Issue: #29）
 
