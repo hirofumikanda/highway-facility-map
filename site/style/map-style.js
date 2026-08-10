@@ -63,21 +63,23 @@ const CASING_WIDTH = zoomInterpolateWithMultiplier(
   1.7,
 );
 
-// 路線種別区分に応じたケーシング色・塗り色。高速自動車国道系統は濃いオレンジ、
-// 指定都市高速道路・その他は控えめな配色にする（design.md 決定7）。
+// 路線種別区分に応じたケーシング色・塗り色。高速自動車国道系統は濃い緑、
+// 指定都市高速道路・その他は控えめな配色にする（design.md 決定6、
+// 高速道路案内標識を想起させる緑系統を基調に、旧オレンジ配色の濃淡構造は
+// 維持したまま色相のみ変更）。
 const CASING_COLOR = [
   "match",
   ["get", "route_category"],
   "1",
-  "#b35c00",
+  "#1b7a3d",
   "2",
-  "#b35c00",
+  "#1b7a3d",
   "3",
-  "#c97a1f",
+  "#2f8f4e",
   "4",
-  "#b35c00",
+  "#1b7a3d",
   "5",
-  "#8a5a2b",
+  "#5a7a5e",
   "#8c8c8c",
 ];
 
@@ -85,15 +87,15 @@ const FILL_COLOR = [
   "match",
   ["get", "route_category"],
   "1",
-  "#f4a13a",
+  "#4caf6f",
   "2",
-  "#f4a13a",
+  "#4caf6f",
   "3",
-  "#f7b563",
+  "#7cc494",
   "4",
-  "#f4a13a",
+  "#4caf6f",
   "5",
-  "#d9a066",
+  "#8fae91",
   "#bfbfbf",
 ];
 
@@ -245,7 +247,7 @@ export const mapStyle = {
         "text-ignore-placement": false,
       },
       paint: {
-        "text-color": "#7a3d00",
+        "text-color": "#1b5e2e",
         "text-halo-color": "#ffffff",
         "text-halo-width": 1.5,
       },
