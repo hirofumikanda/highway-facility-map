@@ -78,7 +78,7 @@ map.on("click", "points", (event) => {
   }
 
   const coordinates = feature.geometry.coordinates.slice();
-  const { point_name, point_type } = feature.properties;
+  const { point_name, point_type, lane_counts } = feature.properties;
 
   const container = document.createElement("div");
   const nameEl = document.createElement("div");
@@ -86,6 +86,16 @@ map.on("click", "points", (event) => {
   const typeEl = document.createElement("div");
   typeEl.textContent = POINT_TYPE_LABELS[point_type] ?? point_type;
   container.append(nameEl, typeEl);
+
+  // lane_countsはMVT仕様上の制約でJSON文字列としてタイルに保持されている
+  // ため、表示前にパースする（design.md 決定6）。空配列の場合は行を表示
+  // しない（design.md 決定5）。
+  const laneCounts = lane_counts ? JSON.parse(lane_counts) : [];
+  if (laneCounts.length > 0) {
+    const laneEl = document.createElement("div");
+    laneEl.textContent = `車線数: ${laneCounts.join(", ")}`;
+    container.append(laneEl);
+  }
 
   showPopup(coordinates, container);
 });
