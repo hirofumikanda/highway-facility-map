@@ -164,14 +164,17 @@ export const mapStyle = {
     lines: {
       type: "vector",
       url: `pmtiles://${TILES_BASE_URL}lines.pmtiles`,
+      attribution: "出典：国土数値情報（高速道路時系列データ）(国土交通省)",
     },
     points: {
       type: "vector",
       url: `pmtiles://${TILES_BASE_URL}points.pmtiles`,
+      attribution: "出典：国土数値情報（高速道路時系列データ）(国土交通省)",
     },
     prefectures: {
       type: "vector",
       url: `pmtiles://${TILES_BASE_URL}prefectures.pmtiles`,
+      attribution: "出典：国土数値情報（行政区域データ）(国土交通省)",
     },
   },
   layers: [

@@ -29,9 +29,9 @@
 
 ## 4. サイト: データ出典（attribution）表示（Issue: #31）
 
-- [ ] 4.1 `site/style/map-style.js`の`lines`・`points`ソースに国土数値情報
+- [x] 4.1 `site/style/map-style.js`の`lines`・`points`ソースに国土数値情報
       （高速道路時系列データ）の出典attributionを設定する
-- [ ] 4.2 `site/style/map-style.js`の`prefectures`ソースに国土数値情報
+- [x] 4.2 `site/style/map-style.js`の`prefectures`ソースに国土数値情報
       （行政区域データ）の出典attributionを設定する
 
 ## 5. サイト: 路線クリック時のポップアップ（Issue: #32）
