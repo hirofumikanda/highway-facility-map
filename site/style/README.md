@@ -36,5 +36,12 @@ Googleマップのピン/POIマーカー表現を参考に、地点は`circle`�
 表示する。`text-anchor: "top"`と`text-offset: [0, 0.6]`でマーカーの下に
 配置し、マーカーとラベルが重ならないようにしている。
 
-- OpenSpec Change: `highway-facility-map`
+## データ出典表示（実装済み: Issue #31）
+
+`lines`・`points`・`prefectures`の各ソースに`attribution`（国土数値情報
+（高速道路時系列データ／行政区域データ）(国土交通省)）を設定している。
+`main.js`側でAttributionControlを無効化していないため、MapLibre標準の
+AttributionControl（右下）に自動的に連結表示される（design.md 決定1）。
+
+- OpenSpec Change: `highway-facility-map`, `add-attribution-route-lane-popups`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-map-viewer/spec.md`
