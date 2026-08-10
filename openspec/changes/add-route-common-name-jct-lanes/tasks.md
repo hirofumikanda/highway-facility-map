@@ -37,11 +37,11 @@
 
 ## 5. タイル生成・配置（Issue: #46）
 
-- [ ] 5.1 `./pipeline/build.sh`を実行し、`common_name`・`route_number`・更新済み
+- [x] 5.1 `./pipeline/build.sh`を実行し、`common_name`・`route_number`・更新済み
       `lane_counts`を含む`lines.pmtiles`・`points.pmtiles`を再生成する
-- [ ] 5.2 `pipeline/tilegen/verify_tiles.py`で新属性がタイル内に保持されていることを
+- [x] 5.2 `pipeline/tilegen/verify_tiles.py`で新属性がタイル内に保持されていることを
       確認する
-- [ ] 5.3 再生成した`site/tiles/lines.pmtiles`・`points.pmtiles`を配置する
+- [x] 5.3 再生成した`site/tiles/lines.pmtiles`・`points.pmtiles`を配置する
 
 ## 6. サイト: 路線ラベルの通称名優先表示（Issue: #47）
 
