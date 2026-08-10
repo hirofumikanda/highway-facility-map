@@ -52,10 +52,24 @@ def main():
         if "route_name" not in f["properties"] or "route_category" not in f["properties"]
     )
     check(ok_flags, "route_name/route_category属性の欠落件数", missing_line_props, 0)
+    missing_lane_count = sum(
+        1
+        for f in lines["features"]
+        if not isinstance(f["properties"].get("lane_count"), int)
+    )
+    check(ok_flags, "lane_count属性の欠落件数", missing_lane_count, 0)
 
     with open(POINTS_PATH, encoding="utf-8") as f:
         points = json.load(f)
     check(ok_flags, "現況地点の件数", len(points["features"]), EXPECTED_POINT_COUNT)
+    missing_lane_counts = sum(
+        1 for f in points["features"] if "lane_counts" not in f["properties"]
+    )
+    check(ok_flags, "lane_counts属性の欠落件数", missing_lane_counts, 0)
+    empty_lane_counts = sum(
+        1 for f in points["features"] if f["properties"].get("lane_counts") == []
+    )
+    print(f"[INFO] lane_countsが空の地点数: {empty_lane_counts}")
 
     type_counts = Counter(f["properties"]["point_type"] for f in points["features"])
     for point_type, expected_count in EXPECTED_POINT_TYPE_COUNTS.items():
