@@ -125,16 +125,24 @@ map.on("click", "lines-fill", (event) => {
     return;
   }
 
-  const { route_name, route_category, lane_count } = feature.properties;
+  const { route_name, route_category, lane_count, common_name, route_number } =
+    feature.properties;
 
   const container = document.createElement("div");
   const nameEl = document.createElement("div");
-  nameEl.textContent = route_name;
+  nameEl.textContent = common_name ?? route_name;
   const categoryEl = document.createElement("div");
   categoryEl.textContent = ROUTE_CATEGORY_LABELS[route_category] ?? route_category;
   const laneEl = document.createElement("div");
   laneEl.textContent = `車線数: ${lane_count}`;
   container.append(nameEl, categoryEl, laneEl);
+
+  // 通称名がある路線にのみ、路線番号（例：E1）を表示する（design.md 決定3）。
+  if (common_name) {
+    const routeNumberEl = document.createElement("div");
+    routeNumberEl.textContent = `路線番号: ${route_number}`;
+    container.append(routeNumberEl);
+  }
 
   showPopup(event.lngLat, container);
 });
