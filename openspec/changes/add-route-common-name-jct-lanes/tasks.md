@@ -13,12 +13,12 @@
 
 ## 2. パイプライン前処理: 路線への通称名・路線番号付与（Issue: #43）
 
-- [ ] 2.1 `pipeline/preprocess/filter_lines.py`で`route_name`をキーに
+- [x] 2.1 `pipeline/preprocess/filter_lines.py`で`route_name`をキーに
       `ROUTE_COMMON_NAMES`を参照し、ヒットした地物にのみ`common_name`・
       `route_number`属性を追加する（ヒットしない場合は両属性を追加しない）
-- [ ] 2.2 `pipeline/preprocess/verify_counts.py`に、`common_name`・
+- [x] 2.2 `pipeline/preprocess/verify_counts.py`に、`common_name`・
       `route_number`が付与された路線地物数を出力する検証を追加する
-- [ ] 2.3 `pipeline/preprocess/README.md`の出力属性説明を更新する
+- [x] 2.3 `pipeline/preprocess/README.md`の出力属性説明を更新する
 
 ## 3. パイプライン前処理: JCTのlane_counts重複排除の廃止（Issue: #44）
 

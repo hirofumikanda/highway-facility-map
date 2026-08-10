@@ -58,6 +58,10 @@ def main():
         if not isinstance(f["properties"].get("lane_count"), int)
     )
     check(ok_flags, "lane_count属性の欠落件数", missing_lane_count, 0)
+    common_name_count = sum(
+        1 for f in lines["features"] if "common_name" in f["properties"]
+    )
+    print(f"[INFO] common_name/route_numberが付与された路線地物数: {common_name_count}")
 
     with open(POINTS_PATH, encoding="utf-8") as f:
         points = json.load(f)
