@@ -36,11 +36,11 @@
 
 ## 5. サイト: 路線クリック時のポップアップ（Issue: #32）
 
-- [ ] 5.1 `site/main.js`に路線種別区分（`route_category`）コードを人が読める
+- [x] 5.1 `site/main.js`に路線種別区分（`route_category`）コードを人が読める
       種別名に変換するラベル表（design.md 決定2）を追加する
-- [ ] 5.2 `site/main.js`に`lines-fill`レイヤーの`click`ハンドラを追加し、
+- [x] 5.2 `site/main.js`に`lines-fill`レイヤーの`click`ハンドラを追加し、
       路線名・路線種別名・車線数を表示するポップアップを実装する
-- [ ] 5.3 `lines-fill`レイヤーへのホバー時にカーソルをpointerに変更する
+- [x] 5.3 `lines-fill`レイヤーへのホバー時にカーソルをpointerに変更する
       処理を追加する
 
 ## 6. サイト: 地点ポップアップへの接続路線車線数の追加（Issue: #33）
