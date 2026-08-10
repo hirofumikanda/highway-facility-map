@@ -22,10 +22,10 @@
 
 ## 3. パイプライン前処理: JCTのlane_counts重複排除の廃止（Issue: #44）
 
-- [ ] 3.1 `pipeline/preprocess/filter_points.py`の`connected_lane_counts`が
+- [x] 3.1 `pipeline/preprocess/filter_points.py`の`connected_lane_counts`が
       `lane_count`を集める際のデータ構造を`set`から`list`に変更し、重複を排除せず
       昇順ソートのみ行うようにする
-- [ ] 3.2 `pipeline/preprocess/README.md`の`lane_counts`属性の説明
+- [x] 3.2 `pipeline/preprocess/README.md`の`lane_counts`属性の説明
       （重複排除・昇順ソート → 昇順ソートのみ）を更新する
 
 ## 4. パイプライン前処理の実行確認（Issue: #45）

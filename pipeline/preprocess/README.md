@@ -39,10 +39,11 @@ $ ./pipeline/preprocess/run.sh
   付与しない）
 - `filter_points.py` — 現況地点を抽出し、`point_name`（地点名）・
   `point_type`（接合部種別コード）・`lane_counts`（地点座標とライン地物の頂点
-  一致判定により空間的に接続すると判定した路線の`lane_count`を重複排除・昇順
-  ソートした配列）を保持しつつ、種別ごとのtippecanoe`minzoom`（ジャンクション=8
-  / 一般IC=10 / スマートIC=12 / その他=14）を付与した
-  `../output/points.current.geojson` を書き出す
+  一致判定により空間的に接続すると判定した路線の`lane_count`を昇順ソートした
+  配列。重複は排除せず、接続する路線の数だけ値を保持する。例えば車線数4の
+  路線が2本接続するJCTでは`[4, 4]`になる）を保持しつつ、種別ごとの
+  tippecanoe`minzoom`（ジャンクション=8 / 一般IC=10 / スマートIC=12 /
+  その他=14）を付与した `../output/points.current.geojson` を書き出す
 - `verify_counts.py` — 上記2ファイルの件数・内訳・minzoom付与・`lane_count`/
   `lane_counts`属性の付与が期待通りであることを検証し、`lane_counts`が空になる
   地点数、および`common_name`/`route_number`が付与された路線地物数を報告する
