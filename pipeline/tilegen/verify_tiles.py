@@ -8,9 +8,10 @@
   - 4.3: z14では地物数（タイル境界の重複を`id`で除去した一意な数）が
          現況地点数（2,384件）と一致する
   - 4.4: 路線タイルはズーム4〜14の各レベルで生成され、
-         route_name/route_category属性を保持する
+         route_name/route_category/lane_count属性を保持する
   - 都道府県境界タイルはズーム4〜8の各レベルで生成され、
     N03_001（都道府県名）属性を保持する
+  - 地点タイルはlane_counts属性を保持する
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
@@ -83,6 +84,16 @@ def verify_points(ok_flags):
         )
         previous_types = types
 
+        missing_lane_counts = sum(
+            1 for f in features if "lane_counts" not in f["properties"]
+        )
+        check(
+            ok_flags,
+            f"z{zoom}でlane_counts属性が欠落している件数",
+            missing_lane_counts,
+            0,
+        )
+
         if zoom == 14:
             check(ok_flags, "z14の一意な地物数（重複排除後）", len(type_by_id), EXPECTED_POINT_COUNT)
 
@@ -101,6 +112,16 @@ def verify_lines(ok_flags):
             ok_flags,
             f"z{zoom}でroute_name/route_category属性が欠落している件数",
             missing_attrs,
+            0,
+        )
+
+        missing_lane_count = sum(
+            1 for f in features if "lane_count" not in f["properties"]
+        )
+        check(
+            ok_flags,
+            f"z{zoom}でlane_count属性が欠落している件数",
+            missing_lane_count,
             0,
         )
 
