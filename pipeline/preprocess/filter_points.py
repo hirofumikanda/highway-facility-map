@@ -51,12 +51,16 @@ def load_line_geometries(lines_source):
 
 
 def connected_lane_counts(point_geom, line_geometries):
-    """地点座標に頂点一致判定で接続する路線の車線数を、重複排除・昇順ソートして返す。"""
-    matched = {
+    """地点座標に頂点一致判定で接続する路線の車線数を、重複を排除せず昇順ソートして返す。
+
+    同じ車線数を持つ路線が複数接続する場合（主にJCT）も、接続する路線の数だけ
+    値を保持する（design.md 決定4）。
+    """
+    matched = [
         lane_count
         for line_geom, lane_count in line_geometries
         if point_geom.distance(line_geom) <= CONNECTION_DISTANCE_THRESHOLD_DEGREES
-    }
+    ]
     return sorted(matched)
 
 
