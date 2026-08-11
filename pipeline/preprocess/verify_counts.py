@@ -10,13 +10,15 @@
   - 現況路線: 1,289件
   - 現況地点: 2,384件（ジャンクション245 / 一般IC1,942 / スマートIC164 / その他33）
 
-OpenSpec Change: highway-facility-map
-tasks.md: 2.5
+OpenSpec Change: highway-facility-map, add-mlit-route-numbering
+tasks.md: 2.5 / 2.2
 """
 import json
 import sys
 from collections import Counter
 from pathlib import Path
+
+from route_numbers import ROUTE_NUMBERS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LINES_PATH = REPO_ROOT / "pipeline" / "output" / "lines.current.geojson"
@@ -61,7 +63,12 @@ def main():
     common_name_count = sum(
         1 for f in lines["features"] if "common_name" in f["properties"]
     )
-    print(f"[INFO] common_name/route_numberが付与された路線地物数: {common_name_count}")
+    print(f"[INFO] common_nameが付与された路線地物数: {common_name_count}")
+    route_number_count = sum(
+        1 for f in lines["features"] if "route_number" in f["properties"]
+    )
+    print(f"[INFO] ROUTE_NUMBERS対応表のエントリ数: {len(ROUTE_NUMBERS)}")
+    print(f"[INFO] route_numberが付与された路線地物数: {route_number_count}")
 
     with open(POINTS_PATH, encoding="utf-8") as f:
         points = json.load(f)
