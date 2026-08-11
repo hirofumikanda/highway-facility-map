@@ -99,6 +99,30 @@ const FILL_COLOR = [
   "#bfbfbf",
 ];
 
+// 路線番号バッジ（矩形の緑背景×白字）の背景色。CASING_COLOR／FILL_COLORの
+// いずれとも異なる固定の濃い緑とし、ズーム・路線種別区分によらず単色にする
+// ことで路線本体の配色との差別化を図る（design.md 決定3）。
+const ROUTE_NUMBER_BADGE_COLOR = "#0a5c34";
+
+// route-number-badgesレイヤーの`icon-image`として参照するSDF画像のID。
+export const ROUTE_NUMBER_BADGE_IMAGE_ID = "route-number-badge";
+
+// 矩形バッジ用の1x1 SDF画像を生成し、`map.addImage`でスタイルに登録する。
+// SDF画像はアルファチャンネルを距離値として扱われるため、全ピクセルを
+// 最大値（255＝完全に内側）にすることで、`icon-text-fit: "both"`により
+// テキストサイズへ拡縮されたときに単色の矩形として描画される
+// （design.md 決定3）。`icon-color`（`ROUTE_NUMBER_BADGE_COLOR`）で着色する。
+export function registerRouteNumberBadgeImage(map) {
+  if (map.hasImage(ROUTE_NUMBER_BADGE_IMAGE_ID)) {
+    return;
+  }
+  map.addImage(
+    ROUTE_NUMBER_BADGE_IMAGE_ID,
+    { width: 1, height: 1, data: new Uint8Array([255, 255, 255, 255]) },
+    { sdf: true },
+  );
+}
+
 // 低ズームでは控えめに、高ズームでは鮮明になるよう不透明度をズーム連動させる。
 const LINE_OPACITY_BY_ZOOM = [
   "interpolate",
@@ -253,6 +277,38 @@ export const mapStyle = {
         "text-color": "#1b5e2e",
         "text-halo-color": "#ffffff",
         "text-halo-width": 1.5,
+      },
+    },
+    // 路線番号（route_number）を、路線名ラベルとは別にライン沿いへ一定間隔で
+    // 表示する。矩形の緑背景×白字とし、路線本体（ケーシング・塗り）とは
+    // 異なる固定色（ROUTE_NUMBER_BADGE_COLOR）で差別化する。route_numberが
+    // 存在しない地物には`text-field`が空になりシンボルが描画されない
+    // （design.md 決定3）。`route-labels`の直後（上）に配置し、
+    // `icon-allow-overlap`/`text-allow-overlap`をfalseにすることで、両
+    // レイヤー間で共有される衝突判定により路線名ラベルとの重なりを回避する。
+    {
+      id: "route-number-badges",
+      type: "symbol",
+      source: "lines",
+      "source-layer": "lines",
+      layout: {
+        "symbol-placement": "line",
+        "symbol-spacing": 300,
+        "icon-image": ROUTE_NUMBER_BADGE_IMAGE_ID,
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [2, 4, 2, 4],
+        "text-field": ["get", "route_number"],
+        "text-font": ["Klokantech Noto Sans CJK Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 8, 9, 14, 12],
+        "text-letter-spacing": 0.02,
+        "icon-allow-overlap": false,
+        "text-allow-overlap": false,
+        "icon-ignore-placement": false,
+        "text-ignore-placement": false,
+      },
+      paint: {
+        "icon-color": ROUTE_NUMBER_BADGE_COLOR,
+        "text-color": "#ffffff",
       },
     },
     {
