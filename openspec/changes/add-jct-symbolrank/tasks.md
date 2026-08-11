@@ -5,8 +5,8 @@
 
 ## 2. パイプライン: 検証追加と実行確認（Issue: #82）
 
-- [ ] 2.1 `pipeline/preprocess/verify_counts.py`に、ジャンクションの`symbolrank`ランク別件数（`1`・`2`・`3`それぞれの件数）を出力する検証を追加する。
-- [ ] 2.2 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`のジャンクション地物に`symbolrank`が期待通り付与されること（ジャンクション以外には付与されないこと、車線数合計と閾値の対応が正しいこと）を確認する。
+- [x] 2.1 `pipeline/preprocess/verify_counts.py`に、ジャンクションの`symbolrank`ランク別件数（`1`・`2`・`3`それぞれの件数）を出力する検証を追加する。
+- [x] 2.2 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`のジャンクション地物に`symbolrank`が期待通り付与されること（ジャンクション以外には付与されないこと、車線数合計と閾値の対応が正しいこと）を確認する。
 
 ## 3. タイル生成・配置（Issue: #83）
 
