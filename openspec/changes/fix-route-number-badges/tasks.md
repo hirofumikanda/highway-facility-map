@@ -1,6 +1,6 @@
 ## 1. バッジの向きを常に正立にする（Issue: #73）
 
-- [ ] 1.1 `site/style/map-style.js`の`route-number-badges`レイヤーの`layout`に`icon-rotation-alignment: "viewport"`・`text-rotation-alignment: "viewport"`を追加する。
+- [x] 1.1 `site/style/map-style.js`の`route-number-badges`レイヤーの`layout`に`icon-rotation-alignment: "viewport"`・`text-rotation-alignment: "viewport"`を追加する。
 
 ## 2. `route_number`非存在時の非表示を明示化する（Issue: #74）
 
