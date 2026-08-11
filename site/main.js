@@ -10,7 +10,11 @@ import {
   Popup,
   addProtocol,
 } from "https://cdn.jsdelivr.net/npm/maplibre-gl@6.2.0/dist/maplibre-gl.mjs";
-import { mapStyle, registerRouteNumberBadgeImage } from "./style/map-style.js";
+import {
+  mapStyle,
+  registerRouteNumberBadgeImage,
+  registerRouteNumberBadgeShieldImage,
+} from "./style/map-style.js";
 
 // 接合部種別（point_type）を人が読める種別名に変換する（design.md 決定3）。
 const POINT_TYPE_LABELS = {
@@ -54,11 +58,13 @@ const map = new Map({
 
 map.addControl(new NavigationControl(), "top-right");
 
-// route-number-badgesレイヤー（矩形バッジ）が参照するSDF画像は、実行時に
-// `map.addImage`で登録する必要があるため、styleの読み込み完了後に登録する
-// （design.md 決定3）。
+// route-number-badges（矩形バッジ）・route-number-badges-shield（シールド
+// バッジ）レイヤーが参照するSDF画像は、実行時に`map.addImage`で登録する
+// 必要があるため、styleの読み込み完了後に登録する
+// （design.md 決定3、fix-route-number-badges design.md 決定3）。
 map.on("load", () => {
   registerRouteNumberBadgeImage(map);
+  registerRouteNumberBadgeShieldImage(map);
 });
 
 // 現在表示中のポップアップ（路線・地点で共有）。新しいポップアップを開く前に

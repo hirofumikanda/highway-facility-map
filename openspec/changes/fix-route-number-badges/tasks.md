@@ -8,10 +8,10 @@
 
 ## 3. `route_category`に応じた矩形／シールド形の描き分け（Issue: #75）
 
-- [ ] 3.1 シールド形SDF画像（2値マスク、矩形＋下部先細り）を生成する関数（例：`registerRouteNumberBadgeShieldImage`）と、その画像ID定数を`site/style/map-style.js`に追加する。
-- [ ] 3.2 既存`route-number-badges`レイヤーの`filter`を`["all", ["has", "route_number"], ["!=", ["get", "route_category"], "5"]]`に変更する（矩形のまま、`route_category`1〜4のみ対象）。
-- [ ] 3.3 新規レイヤー`route-number-badges-shield`を`route-number-badges`の直後に追加する。`filter`は`["all", ["has", "route_number"], ["==", ["get", "route_category"], "5"]]`とし、`layout`（`symbol-placement`・`symbol-spacing`・`text-field`・フォント・`text-size`・回転整列）と`paint`（`icon-color`・`text-color`）は既存レイヤーと同じ値、`icon-image`のみシールド画像を参照する。
-- [ ] 3.4 `site/main.js`の`map.on("load", ...)`内で、新規シールド画像登録関数を`registerRouteNumberBadgeImage`と併せて呼び出す。
+- [x] 3.1 シールド形SDF画像（2値マスク、矩形＋下部先細り）を生成する関数（例：`registerRouteNumberBadgeShieldImage`）と、その画像ID定数を`site/style/map-style.js`に追加する。
+- [x] 3.2 既存`route-number-badges`レイヤーの`filter`を`["all", ["has", "route_number"], ["!=", ["get", "route_category"], "5"]]`に変更する（矩形のまま、`route_category`1〜4のみ対象）。
+- [x] 3.3 新規レイヤー`route-number-badges-shield`を`route-number-badges`の直後に追加する。`filter`は`["all", ["has", "route_number"], ["==", ["get", "route_category"], "5"]]`とし、`layout`（`symbol-placement`・`symbol-spacing`・`text-field`・フォント・`text-size`・回転整列）と`paint`（`icon-color`・`text-color`）は既存レイヤーと同じ値、`icon-image`のみシールド画像を参照する。
+- [x] 3.4 `site/main.js`の`map.on("load", ...)`内で、新規シールド画像登録関数を`registerRouteNumberBadgeImage`と併せて呼び出す。
 
 ## 4. 動作確認（Issue: #76）
 

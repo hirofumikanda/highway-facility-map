@@ -129,6 +129,90 @@ export function registerRouteNumberBadgeImage(map) {
   );
 }
 
+// route-number-badges-shieldレイヤーの`icon-image`として参照するSDF画像のID。
+// MLITナンバリング一覧に由来しない路線番号（指定都市高速道路等、
+// route_categoryが5）のバッジに使う（fix-route-number-badges design.md 決定3）。
+export const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID = "route-number-badge-shield";
+
+// シールド形バッジ用のSDF画像を生成し、`map.addImage`でスタイルに登録する。
+// 矩形バッジ（全ピクセル255の一様画像）と異なり、画像内にシールド形状の
+// 2値マスク（上部は矩形、下部は中央に向けて先細りする盾形）を描く。矩形化と
+// 同様に境界のアンチエイリアシングは行わず、内側255／外側0の2値とする。
+// 矩形バッジで1x1画像がSDFサンプリングの縁評価に失敗した経緯を踏まえ、
+// 十分な解像度（32x32）を使用する（fix-route-number-badges design.md 決定3）。
+const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE = 32;
+
+// シールド上部（矩形部分）の高さの割合。残り（下部）は中央へ向けて先細りする。
+const ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO = 0.6;
+
+function buildRouteNumberBadgeShieldImageData(size, rectRatio) {
+  const data = new Uint8Array(size * size * 4);
+  const rectBottomY = size * rectRatio;
+  const centerX = (size - 1) / 2;
+  const maxHalfWidth = size / 2;
+  for (let y = 0; y < size; y++) {
+    const taperProgress = Math.max(0, y - rectBottomY) / (size - 1 - rectBottomY);
+    const halfWidth = y < rectBottomY ? maxHalfWidth : maxHalfWidth * (1 - taperProgress);
+    for (let x = 0; x < size; x++) {
+      const inside = Math.abs(x - centerX) <= halfWidth;
+      const value = inside ? 255 : 0;
+      const pixelIndex = (y * size + x) * 4;
+      data[pixelIndex] = value;
+      data[pixelIndex + 1] = value;
+      data[pixelIndex + 2] = value;
+      data[pixelIndex + 3] = value;
+    }
+  }
+  return data;
+}
+
+export function registerRouteNumberBadgeShieldImage(map) {
+  if (map.hasImage(ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID)) {
+    return;
+  }
+  const data = buildRouteNumberBadgeShieldImageData(
+    ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
+    ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO,
+  );
+  map.addImage(
+    ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID,
+    {
+      width: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
+      height: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
+      data,
+    },
+    { sdf: true },
+  );
+}
+
+// 矩形バッジ・シールドバッジ両レイヤーで共通のlayout/paint。`icon-image`と
+// `filter`のみ差し替える（fix-route-number-badges design.md 決定3）。
+const ROUTE_NUMBER_BADGE_LAYOUT_BASE = {
+  "symbol-placement": "line",
+  "symbol-spacing": 300,
+  // "map"（既定）だとライン区間の角度に追従してバッジが傾き、天地が
+  // 逆になることがある。"viewport"でライン追従の回転を無効化し、常に
+  // 画面に対して正立（北を上と見なせる向き）で表示する
+  // （fix-route-number-badges design.md 決定1）。
+  "icon-rotation-alignment": "viewport",
+  "text-rotation-alignment": "viewport",
+  "icon-text-fit": "both",
+  "icon-text-fit-padding": [2, 4, 2, 4],
+  "text-field": ["get", "route_number"],
+  "text-font": ["Klokantech Noto Sans CJK Regular"],
+  "text-size": ["interpolate", ["linear"], ["zoom"], 8, 9, 14, 12],
+  "text-letter-spacing": 0.02,
+  "icon-allow-overlap": false,
+  "text-allow-overlap": false,
+  "icon-ignore-placement": false,
+  "text-ignore-placement": false,
+};
+
+const ROUTE_NUMBER_BADGE_PAINT = {
+  "icon-color": ROUTE_NUMBER_BADGE_COLOR,
+  "text-color": "#ffffff",
+};
+
 // 低ズームでは控えめに、高ズームでは鮮明になるよう不透明度をズーム連動させる。
 const LINE_OPACITY_BY_ZOOM = [
   "interpolate",
@@ -286,44 +370,39 @@ export const mapStyle = {
       },
     },
     // 路線番号（route_number）を、路線名ラベルとは別にライン沿いへ一定間隔で
-    // 表示する。矩形の緑背景×白字とし、路線本体（ケーシング・塗り）とは
-    // 異なる固定色（ROUTE_NUMBER_BADGE_COLOR）で差別化する。`filter`で
-    // route_numberを持つ地物のみに限定しており、存在しない地物にはアイコン・
-    // テキストとも描画されない（fix-route-number-badges design.md 決定2）。
-    // `route-labels`の直後（上）に配置し、`icon-allow-overlap`/
-    // `text-allow-overlap`をfalseにすることで、両レイヤー間で共有される
-    // 衝突判定により路線名ラベルとの重なりを回避する。
+    // 表示する。緑背景×白字とし、路線本体（ケーシング・塗り）とは異なる
+    // 固定色（ROUTE_NUMBER_BADGE_COLOR）で差別化する。`filter`でroute_number
+    // を持つ地物のみに限定しており、存在しない地物にはアイコン・テキストとも
+    // 描画されない（fix-route-number-badges design.md 決定2）。背景の形状は、
+    // MLITナンバリング一覧に由来する路線番号（route_categoryが1〜4）では
+    // 矩形（本レイヤー）、それ以外（route_categoryが5、指定都市高速道路等の
+    // 独自番号）ではシールド形（直後のroute-number-badges-shieldレイヤー）と
+    // 分けて描き分ける（design.md 決定3）。`route-labels`の直後（上）に配置し、
+    // `icon-allow-overlap`/`text-allow-overlap`をfalseにすることで、レイヤー
+    // 間で共有される衝突判定により路線名ラベルとの重なりを回避する。
     {
       id: "route-number-badges",
       type: "symbol",
       source: "lines",
       "source-layer": "lines",
-      filter: ["has", "route_number"],
+      filter: ["all", ["has", "route_number"], ["!=", ["get", "route_category"], "5"]],
       layout: {
-        "symbol-placement": "line",
-        "symbol-spacing": 300,
-        // "map"（既定）だとライン区間の角度に追従してバッジが傾き、天地が
-        // 逆になることがある。"viewport"でライン追従の回転を無効化し、常に
-        // 画面に対して正立（北を上と見なせる向き）で表示する
-        // （fix-route-number-badges design.md 決定1）。
-        "icon-rotation-alignment": "viewport",
-        "text-rotation-alignment": "viewport",
+        ...ROUTE_NUMBER_BADGE_LAYOUT_BASE,
         "icon-image": ROUTE_NUMBER_BADGE_IMAGE_ID,
-        "icon-text-fit": "both",
-        "icon-text-fit-padding": [2, 4, 2, 4],
-        "text-field": ["get", "route_number"],
-        "text-font": ["Klokantech Noto Sans CJK Regular"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 8, 9, 14, 12],
-        "text-letter-spacing": 0.02,
-        "icon-allow-overlap": false,
-        "text-allow-overlap": false,
-        "icon-ignore-placement": false,
-        "text-ignore-placement": false,
       },
-      paint: {
-        "icon-color": ROUTE_NUMBER_BADGE_COLOR,
-        "text-color": "#ffffff",
+      paint: ROUTE_NUMBER_BADGE_PAINT,
+    },
+    {
+      id: "route-number-badges-shield",
+      type: "symbol",
+      source: "lines",
+      "source-layer": "lines",
+      filter: ["all", ["has", "route_number"], ["==", ["get", "route_category"], "5"]],
+      layout: {
+        ...ROUTE_NUMBER_BADGE_LAYOUT_BASE,
+        "icon-image": ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID,
       },
+      paint: ROUTE_NUMBER_BADGE_PAINT,
     },
     {
       id: "points",
