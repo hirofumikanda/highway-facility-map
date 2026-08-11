@@ -300,6 +300,12 @@ export const mapStyle = {
       layout: {
         "symbol-placement": "line",
         "symbol-spacing": 300,
+        // "map"（既定）だとライン区間の角度に追従してバッジが傾き、天地が
+        // 逆になることがある。"viewport"でライン追従の回転を無効化し、常に
+        // 画面に対して正立（北を上と見なせる向き）で表示する
+        // （fix-route-number-badges design.md 決定1）。
+        "icon-rotation-alignment": "viewport",
+        "text-rotation-alignment": "viewport",
         "icon-image": ROUTE_NUMBER_BADGE_IMAGE_ID,
         "icon-text-fit": "both",
         "icon-text-fit-padding": [2, 4, 2, 4],
