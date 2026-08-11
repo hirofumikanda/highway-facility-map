@@ -9,15 +9,17 @@
 期待値:
   - 現況路線: 1,289件
   - 現況地点: 2,384件（ジャンクション245 / 一般IC1,942 / スマートIC164 / その他33）
+  - ジャンクションのsymbolrank: 1が79件 / 2が93件 / 3が73件
 
-OpenSpec Change: highway-facility-map, add-mlit-route-numbering
-tasks.md: 2.5 / 2.2
+OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank
+tasks.md: 2.5 / 2.2 / 2.1
 """
 import json
 import sys
 from collections import Counter
 from pathlib import Path
 
+from filter_points import JCT_SYMBOLRANK_MINZOOM
 from route_numbers import ROUTE_NUMBERS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -32,7 +34,24 @@ EXPECTED_POINT_TYPE_COUNTS = {
     "2": 164,  # スマートインターチェンジ
     "4": 33,  # その他の接合部
 }
-EXPECTED_POINT_TYPE_MINZOOM = {"3": 8, "1": 10, "2": 12, "4": 14}
+# ジャンクション以外の地点種別のminzoomは固定値のまま（add-jct-symbolrank
+# design.md Non-Goals）。ジャンクションのminzoomはsymbolrankから導出される
+# ため、`JCT_SYMBOLRANK_MINZOOM`（filter_points.pyと共通）を参照する。
+EXPECTED_NON_JCT_MINZOOM = {"1": 10, "2": 12, "4": 14}
+# ジャンクションのsymbolrank別件数の期待値。245件の実データがほぼ均等な3群に
+# 分かれる閾値で算出したもの（add-jct-symbolrank design.md 決定2）。
+EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 79, 2: 93, 3: 73}
+
+
+def expected_point_minzoom(props):
+    """地点地物のtippecanoe.minzoomの期待値を返す。
+
+    ジャンクションはsymbolrankから導出し、それ以外は地点種別ごとの固定値を
+    用いる（add-jct-symbolrank design.md 決定3）。
+    """
+    if props["point_type"] == "3":
+        return JCT_SYMBOLRANK_MINZOOM.get(props.get("symbolrank"))
+    return EXPECTED_NON_JCT_MINZOOM.get(props["point_type"])
 
 
 def check(ok_flags, label, actual, expected):
@@ -91,11 +110,30 @@ def main():
             expected_count,
         )
 
+    jct_features = [f for f in points["features"] if f["properties"]["point_type"] == "3"]
+    missing_symbolrank = sum(1 for f in jct_features if "symbolrank" not in f["properties"])
+    check(ok_flags, "ジャンクションのsymbolrank属性の欠落件数", missing_symbolrank, 0)
+    symbolrank_counts = Counter(
+        f["properties"]["symbolrank"] for f in jct_features if "symbolrank" in f["properties"]
+    )
+    for rank, expected_count in EXPECTED_JCT_SYMBOLRANK_COUNTS.items():
+        check(
+            ok_flags,
+            f"ジャンクションのsymbolrank={rank}の件数",
+            symbolrank_counts.get(rank, 0),
+            expected_count,
+        )
+    non_jct_with_symbolrank = sum(
+        1
+        for f in points["features"]
+        if f["properties"]["point_type"] != "3" and "symbolrank" in f["properties"]
+    )
+    check(ok_flags, "ジャンクション以外へのsymbolrank誤付与件数", non_jct_with_symbolrank, 0)
+
     minzoom_mismatches = sum(
         1
         for f in points["features"]
-        if f.get("tippecanoe", {}).get("minzoom")
-        != EXPECTED_POINT_TYPE_MINZOOM.get(f["properties"]["point_type"])
+        if f.get("tippecanoe", {}).get("minzoom") != expected_point_minzoom(f["properties"])
     )
     check(ok_flags, "minzoom付与の不一致件数", minzoom_mismatches, 0)
 
