@@ -10,8 +10,8 @@
 
 ## 3. タイル生成・配置（Issue: #83）
 
-- [ ] 3.1 `pipeline/tilegen/verify_tiles.py`に、ジャンクションの`symbolrank`別ズーム収録の検証を追加する：ズームレベル8には`symbolrank=1`のジャンクションのみ、ズームレベル9には`symbolrank`が`1`・`2`のジャンクション、ズームレベル10以降はすべてのジャンクションが収録されることを確認する。
-- [ ] 3.2 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成・配置する。
+- [x] 3.1 `pipeline/tilegen/verify_tiles.py`に、ジャンクションの`symbolrank`別ズーム収録の検証を追加する：ズームレベル8には`symbolrank=1`のジャンクションのみ、ズームレベル9には`symbolrank`が`1`・`2`のジャンクション、ズームレベル10以降はすべてのジャンクションが収録されることを確認する。
+- [x] 3.2 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成・配置する。
 
 ## 4. サイト: ラベル衝突優先順位への反映（Issue: #84）
 

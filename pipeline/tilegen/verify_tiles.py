@@ -16,13 +16,17 @@
     地物について、z14でそれらの属性を保持する。両属性は独立に解決される
     ため、route_numberはcommon_nameの有無にかかわらず保持されることを
     確認する（add-mlit-route-numbering design.md 決定2）
+  - ジャンクションは、地物ごとのsymbolrank（1〜3、値が小さいほど上位）に
+    応じて、z8はsymbolrank=1のみ、z9はsymbolrank=1・2、z10は全ジャンクション
+    が収録され、各ズームの収録集合はより低いズームの収録集合を包含する
+    （add-jct-symbolrank design.md 決定3）
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering
-tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-jct-symbolrank
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）, 3.1（add-jct-symbolrank）
 """
 import json
 import subprocess
@@ -45,6 +49,18 @@ EXPECTED_TYPES_BY_ZOOM = {
     10: {"3", "1"},
     12: {"3", "1", "2"},
     14: {"3", "1", "2", "4"},
+}
+
+# ジャンクションのsymbolrank（1〜3、値が小さいほど上位）別の件数の期待値。
+# 245件のジャンクション実データに基づく（add-jct-symbolrank design.md 決定2）。
+EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 79, 2: 93, 3: 73}
+
+# ズームごとに収録されるべきジャンクションのsymbolrankの集合
+# （add-jct-symbolrank design.md 決定3）。
+EXPECTED_JCT_SYMBOLRANKS_BY_ZOOM = {
+    8: {1},
+    9: {1, 2},
+    10: {1, 2, 3},
 }
 
 
@@ -100,6 +116,50 @@ def verify_points(ok_flags):
 
         if zoom == 14:
             check(ok_flags, "z14の一意な地物数（重複排除後）", len(type_by_id), EXPECTED_POINT_COUNT)
+
+
+def verify_jct_symbolrank(ok_flags):
+    """ジャンクションがsymbolrankに応じてz8/z9/z10で段階的に収録されることを確認する。
+
+    z8はsymbolrank=1のみ、z9はsymbolrank=1・2、z10はsymbolrank=1・2・3
+    （全ジャンクション）が収録され、各ズームの収録集合はより低いズームの
+    収録集合を包含する（add-jct-symbolrank design.md 決定3）。
+    """
+    previous_ids = set()
+    for zoom in sorted(EXPECTED_JCT_SYMBOLRANKS_BY_ZOOM):
+        expected_ranks = EXPECTED_JCT_SYMBOLRANKS_BY_ZOOM[zoom]
+        features = decode_zoom(POINTS_PMTILES, zoom)
+        jct_symbolrank_by_id = {
+            f["id"]: f["properties"]["symbolrank"]
+            for f in features
+            if f["properties"]["point_type"] == "3"
+        }
+        ranks = set(jct_symbolrank_by_id.values())
+
+        check(
+            ok_flags,
+            f"z{zoom}で収録されるジャンクションのsymbolrankの集合",
+            ranks,
+            expected_ranks,
+        )
+
+        expected_count = sum(EXPECTED_JCT_SYMBOLRANK_COUNTS[r] for r in expected_ranks)
+        check(
+            ok_flags,
+            f"z{zoom}で収録されるジャンクションの件数（重複排除後）",
+            len(jct_symbolrank_by_id),
+            expected_count,
+        )
+
+        ids = set(jct_symbolrank_by_id)
+        check(
+            ok_flags,
+            f"z{zoom}のジャンクション収録集合が下位ズームの集合を包含する"
+            f"（{len(previous_ids)}件 <= {len(ids)}件）",
+            previous_ids <= ids,
+            True,
+        )
+        previous_ids = ids
 
 
 def verify_lines(ok_flags):
@@ -191,6 +251,7 @@ def main():
 
     ok_flags = []
     verify_points(ok_flags)
+    verify_jct_symbolrank(ok_flags)
     verify_lines(ok_flags)
     verify_prefectures(ok_flags)
 
