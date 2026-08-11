@@ -11,8 +11,10 @@
 
 ## 2. パイプライン前処理: 路線番号付与ロジックの変更（Issue: #59）
 
-- [ ] 2.1 `pipeline/preprocess/filter_lines.py`を変更し、`route_category`が`1`〜`5`の地物について`ROUTE_NUMBERS`を`route_name`で引き、ヒットすれば`common_name`の有無にかかわらず`route_number`を付与する。`common_name`の解決（`ROUTE_COMMON_NAMES`）は既存ロジックのまま独立して行う。
-- [ ] 2.2 `pipeline/preprocess/verify_counts.py`に、`ROUTE_NUMBERS`のエントリ数・`route_number`が付与された路線地物数を出力する検証を追加する。
+- [x] 2.1 `pipeline/preprocess/filter_lines.py`を変更し、`route_category`が`1`〜`5`の地物について`ROUTE_NUMBERS`を`route_name`で引き、ヒットすれば`common_name`の有無にかかわらず`route_number`を付与する。`common_name`の解決（`ROUTE_COMMON_NAMES`）は既存ロジックのまま独立して行う。
+- [x] 2.2 `pipeline/preprocess/verify_counts.py`に、`ROUTE_NUMBERS`のエントリ数・`route_number`が付与された路線地物数を出力する検証を追加する。
+
+  実施結果: `bash pipeline/preprocess/run.sh`実行で全検証OK。`common_nameが付与された路線地物数: 120`（変更前と同数、既存ロジック非変更を確認）、`ROUTE_NUMBERS対応表のエントリ数: 99`、`route_numberが付与された路線地物数: 501`（`common_name`の有無によらず付与されることを件数差で確認）。あわせて`pipeline/preprocess/README.md`の該当記述を更新した。
 
 ## 3. パイプライン前処理の実行確認（Issue: #60）
 

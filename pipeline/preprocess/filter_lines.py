@@ -4,23 +4,34 @@
 `geojson/N06-25_HighwaySection.geojson` から供用期間終了年（`N06_003`）が
 `9999`（現況として有効）の地物のみを抽出し、スタイリング／ラベル表示に必要な
 属性（路線名・路線種別区分・車線数）のみを残した
-`pipeline/output/lines.current.geojson` を書き出す。法定路線名（`route_name`）が
-`route_common_names.ROUTE_COMMON_NAMES`にヒットする地物には、通称名
-（`common_name`）・路線番号（`route_number`）も付与する（design.md 決定2）。
+`pipeline/output/lines.current.geojson` を書き出す。通称名（`common_name`）・
+路線番号（`route_number`）は、それぞれ独立した対応表・条件で解決する
+（design.md 決定2）。
 
-OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes
-tasks.md: 2.1, 2.2 / 2.1
+- `common_name`: 法定路線名（`route_name`）が`route_common_names.ROUTE_COMMON_NAMES`
+  にヒットする地物にのみ付与する。
+- `route_number`: 路線種別区分（`route_category`）が`1`〜`5`のいずれかであり、
+  `route_name`が`route_numbers.ROUTE_NUMBERS`にヒットする地物に、`common_name`の
+  有無にかかわらず付与する。
+
+OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes, add-mlit-route-numbering
+tasks.md: 2.1, 2.2 / 2.1 / 2.1
 """
 import json
 from pathlib import Path
 
 from route_common_names import ROUTE_COMMON_NAMES
+from route_numbers import ROUTE_NUMBERS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = REPO_ROOT / "geojson" / "N06-25_HighwaySection.geojson"
 OUTPUT_PATH = REPO_ROOT / "pipeline" / "output" / "lines.current.geojson"
 
 CURRENT_END_YEAR = 9999
+
+# route_numberの解決対象とする路線種別区分（design.md 決定1・決定2）。
+# 6（その他）は対象外。
+ROUTE_NUMBER_CATEGORIES = {"1", "2", "3", "4", "5"}
 
 
 def filter_current_lines(source):
@@ -30,15 +41,19 @@ def filter_current_lines(source):
         if props.get("N06_003") != CURRENT_END_YEAR:
             continue
         route_name = props.get("N06_007")
+        route_category = props.get("N06_008")
         properties = {
             "route_name": route_name,
-            "route_category": props.get("N06_008"),
+            "route_category": route_category,
             "lane_count": int(props.get("N06_010")),
         }
         common_name_entry = ROUTE_COMMON_NAMES.get(route_name)
         if common_name_entry is not None:
             properties["common_name"] = common_name_entry["common_name"]
-            properties["route_number"] = common_name_entry["route_number"]
+        if route_category in ROUTE_NUMBER_CATEGORIES:
+            route_number = ROUTE_NUMBERS.get(route_name)
+            if route_number is not None:
+                properties["route_number"] = route_number
         features.append(
             {
                 "type": "Feature",
