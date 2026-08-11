@@ -1,7 +1,7 @@
 ## 1. パイプライン: symbolrank算出とminzoom導出（Issue: #81）
 
-- [ ] 1.1 `pipeline/preprocess/filter_points.py`に、ジャンクション（`point_type`が`3`）向けの`symbolrank`算出ロジックを追加する。`connected_lane_counts()`が返す`lane_counts`の合計値に基づき、`12`以上なら`1`、`8`〜`11`なら`2`、`7`以下なら`3`を付与する。ジャンクション以外には`symbolrank`を付与しない。
-- [ ] 1.2 同ファイルの`POINT_TYPE_MINZOOM`の扱いを変更し、ジャンクションについては`symbolrank`から導出した`minzoom`（`symbolrank=1`→`8`、`2`→`9`、`3`→`10`）を地物ごとの`tippecanoe.minzoom`として使用する。ジャンクション以外の地点種別（一般IC=10、スマートIC=12、その他=14）の`minzoom`は変更しない。
+- [x] 1.1 `pipeline/preprocess/filter_points.py`に、ジャンクション（`point_type`が`3`）向けの`symbolrank`算出ロジックを追加する。`connected_lane_counts()`が返す`lane_counts`の合計値に基づき、`12`以上なら`1`、`8`〜`11`なら`2`、`7`以下なら`3`を付与する。ジャンクション以外には`symbolrank`を付与しない。
+- [x] 1.2 同ファイルの`POINT_TYPE_MINZOOM`の扱いを変更し、ジャンクションについては`symbolrank`から導出した`minzoom`（`symbolrank=1`→`8`、`2`→`9`、`3`→`10`）を地物ごとの`tippecanoe.minzoom`として使用する。ジャンクション以外の地点種別（一般IC=10、スマートIC=12、その他=14）の`minzoom`は変更しない。
 
 ## 2. パイプライン: 検証追加と実行確認（Issue: #82）
 

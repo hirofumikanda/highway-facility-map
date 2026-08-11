@@ -11,8 +11,12 @@
 minzoomの割り当ては design.md の「決定5」に基づく設計値であり、後続のタイル
 生成・表示確認（Issue #3, #7）でのビジュアル確認により調整され得る。
 
-OpenSpec Change: highway-facility-map
-tasks.md: 2.3, 2.4
+ジャンクション（接合部種別`3`）については、接続する路線の車線数合計に基づく
+`symbolrank`（1〜3、値が小さいほど上位）を付与し、`symbolrank`から細分化した
+minzoom（8/9/10）を用いる（add-jct-symbolrank design.md 決定1〜3）。
+
+OpenSpec Change: highway-facility-map, add-jct-symbolrank
+tasks.md: 2.3, 2.4 / 1.1, 1.2
 """
 import json
 from pathlib import Path
@@ -34,12 +38,33 @@ CONNECTION_DISTANCE_THRESHOLD_DEGREES = 1e-6
 # N06_019（接合部種別コード） -> tippecanoeの地物単位minzoom
 # ジャンクション(3) > 一般IC(1) > スマートIC(2) > その他(4) の重要度順に、
 # 低いズームから段階的に収録されるよう割り当てる（design.md 決定5）。
+# ジャンクションについては、地物ごとのsymbolrank（下記）に応じてさらに
+# minzoomを細分化する（add-jct-symbolrank design.md 決定3）。この辞書の
+# "3"の値はsymbolrank=1のジャンクションのminzoomと一致する。
 POINT_TYPE_MINZOOM = {
     "3": 8,  # ジャンクション
     "1": 10,  # 一般インターチェンジ
     "2": 12,  # スマートインターチェンジ
     "4": 14,  # その他の接合部
 }
+
+# ジャンクションのsymbolrank（1〜3、値が小さいほど上位）->tippecanoeのminzoom
+# （add-jct-symbolrank design.md 決定3）。
+JCT_SYMBOLRANK_MINZOOM = {1: 8, 2: 9, 3: 10}
+
+
+def jct_symbolrank(lane_counts):
+    """ジャンクションのsymbolrankを、接続する路線の車線数合計から算出する。
+
+    245件のジャンクション実データでほぼ均等な3群に分かれる閾値
+    （合計12以上->1、8〜11->2、7以下->3）を使用する（design.md 決定1・決定2）。
+    """
+    lane_count_sum = sum(lane_counts)
+    if lane_count_sum >= 12:
+        return 1
+    if lane_count_sum >= 8:
+        return 2
+    return 3
 
 
 def load_line_geometries(lines_source):
@@ -81,16 +106,25 @@ def filter_current_points(source, line_geometries):
         point_geom = shape(feature["geometry"])
         lane_counts = connected_lane_counts(point_geom, line_geometries)
 
+        properties = {
+            "point_name": props.get("N06_018"),
+            "point_type": point_type,
+            "lane_counts": lane_counts,
+        }
+
+        if point_type == "3":
+            symbolrank = jct_symbolrank(lane_counts)
+            properties["symbolrank"] = symbolrank
+            minzoom = JCT_SYMBOLRANK_MINZOOM[symbolrank]
+        else:
+            minzoom = POINT_TYPE_MINZOOM[point_type]
+
         features.append(
             {
                 "type": "Feature",
                 "geometry": feature["geometry"],
-                "properties": {
-                    "point_name": props.get("N06_018"),
-                    "point_type": point_type,
-                    "lane_counts": lane_counts,
-                },
-                "tippecanoe": {"minzoom": POINT_TYPE_MINZOOM[point_type]},
+                "properties": properties,
+                "tippecanoe": {"minzoom": minzoom},
             }
         )
     return {"type": "FeatureCollection", "features": features}
