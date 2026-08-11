@@ -34,9 +34,15 @@
 
 ## 5. サイト: 路線番号のライン沿い表示（Issue: #62）
 
-- [ ] 5.1 `site/style/map-style.js`に、矩形バッジ用のSDF画像を生成し`map.addImage`で登録する処理を追加する。
-- [ ] 5.2 `route-number-badges`シンボルレイヤーを追加する（`symbol-placement: "line"`・`symbol-spacing`によるライン沿い一定間隔配置、`icon-image`＋`icon-text-fit: "both"`による矩形背景、`text-field: ["get", "route_number"]`、`text-color: "#ffffff"`、路線本体の`CASING_COLOR`／`FILL_COLOR`とは異なる固定の緑を`icon-color`に設定）。レイヤー順は`route-labels`の直後（上）に配置する。
-- [ ] 5.3 `icon-allow-overlap: false`・`text-allow-overlap: false`を設定し、既存の`route-labels`との重なりが衝突検出で回避されることを確認する。
+- [x] 5.1 `site/style/map-style.js`に、矩形バッジ用のSDF画像を生成し`map.addImage`で登録する処理を追加する。
+
+  実施結果: `registerRouteNumberBadgeImage(map)`を新設し、1x1・アルファ値255（SDFの「内側」閾値192〜255の範囲内）の画像を`map.addImage(..., { sdf: true })`で登録するようにした。`site/main.js`の`map.on("load", ...)`から呼び出す（画像登録はスタイル読み込み完了後にのみ可能なため）。
+- [x] 5.2 `route-number-badges`シンボルレイヤーを追加する（`symbol-placement: "line"`・`symbol-spacing`によるライン沿い一定間隔配置、`icon-image`＋`icon-text-fit: "both"`による矩形背景、`text-field: ["get", "route_number"]`、`text-color: "#ffffff"`、路線本体の`CASING_COLOR`／`FILL_COLOR`とは異なる固定の緑を`icon-color`に設定）。レイヤー順は`route-labels`の直後（上）に配置する。
+
+  実施結果: `route-number-badges`レイヤーを`route-labels`の直後に追加し、`icon-color`に`CASING_COLOR`・`FILL_COLOR`のいずれとも異なる固定色`#0a5c34`を設定した。`route_number`が存在しない地物は`text-field`が空になりシンボルが描画されない。
+- [x] 5.3 `icon-allow-overlap: false`・`text-allow-overlap: false`を設定し、既存の`route-labels`との重なりが衝突検出で回避されることを確認する。
+
+  実施結果: 両プロパティを`false`に設定した。検証は以下の方法で行った：(1) `@maplibre/maplibre-gl-style-spec`の`validateStyleMin`でスタイル定義がMapLibreスタイル仕様に適合することを確認、(2) `npx serve site`でローカル起動しPlaywright（Chromium）で実地物確認を試みたが、このサンドボックス環境ではMapLibre GL JSがBlob URL経由で生成するWebワーカーの読み込みが`ERR_FILE_NOT_FOUND`で失敗し（`route-labels`等の既存レイヤーも含め、環境起因でどのレイヤーも描画されない制約と判明。コード変更由来の問題ではない）、ブラウザでの目視確認はできなかった。衝突回避の仕組み自体は`route-labels`と同一の方式（`symbol-placement: "line"`・`allow-overlap: false`、MapLibreの共有衝突判定）を踏襲しており、ブラウザでの最終確認はタスク7（動作確認、Issue #64）で改めて行う。
 
 ## 6. サイト: 路線ポップアップの路線番号表示条件変更（Issue: #63）
 
