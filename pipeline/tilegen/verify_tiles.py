@@ -13,14 +13,16 @@
     N03_001（都道府県名）属性を保持する
   - 地点タイルはlane_counts属性を保持する
   - 路線タイルは、通称名・路線番号（common_name/route_number）が付与された
-    地物について、z14でそれらの属性を保持する
+    地物について、z14でそれらの属性を保持する。両属性は独立に解決される
+    ため、route_numberはcommon_nameの有無にかかわらず保持されることを
+    確認する（add-mlit-route-numbering design.md 決定2）
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes
-tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）
 """
 import json
 import subprocess
@@ -130,15 +132,34 @@ def verify_lines(ok_flags):
         common_name_count = sum(
             1 for f in features if "common_name" in f["properties"]
         )
-        print(
-            f"[INFO] z{zoom}でcommon_name/route_number属性を保持する路線地物数: "
-            f"{common_name_count}"
+        route_number_count = sum(
+            1 for f in features if "route_number" in f["properties"]
         )
+        route_number_without_common_name_count = sum(
+            1
+            for f in features
+            if "route_number" in f["properties"] and "common_name" not in f["properties"]
+        )
+        print(f"[INFO] z{zoom}でcommon_name属性を保持する路線地物数: {common_name_count}")
+        print(f"[INFO] z{zoom}でroute_number属性を保持する路線地物数: {route_number_count}")
         if zoom == LINE_MAX_ZOOM:
             check(
                 ok_flags,
-                "z14でcommon_name/route_number属性を保持する路線地物が存在する",
+                "z14でcommon_name属性を保持する路線地物が存在する",
                 common_name_count > 0,
+                True,
+            )
+            check(
+                ok_flags,
+                "z14でroute_number属性を保持する路線地物が存在する",
+                route_number_count > 0,
+                True,
+            )
+            check(
+                ok_flags,
+                "z14でcommon_nameなしでroute_number属性を保持する路線地物が存在する"
+                "（route_numberがcommon_nameから独立して解決されることの確認）",
+                route_number_without_common_name_count > 0,
                 True,
             )
 
