@@ -287,16 +287,18 @@ export const mapStyle = {
     },
     // 路線番号（route_number）を、路線名ラベルとは別にライン沿いへ一定間隔で
     // 表示する。矩形の緑背景×白字とし、路線本体（ケーシング・塗り）とは
-    // 異なる固定色（ROUTE_NUMBER_BADGE_COLOR）で差別化する。route_numberが
-    // 存在しない地物には`text-field`が空になりシンボルが描画されない
-    // （design.md 決定3）。`route-labels`の直後（上）に配置し、
-    // `icon-allow-overlap`/`text-allow-overlap`をfalseにすることで、両
-    // レイヤー間で共有される衝突判定により路線名ラベルとの重なりを回避する。
+    // 異なる固定色（ROUTE_NUMBER_BADGE_COLOR）で差別化する。`filter`で
+    // route_numberを持つ地物のみに限定しており、存在しない地物にはアイコン・
+    // テキストとも描画されない（fix-route-number-badges design.md 決定2）。
+    // `route-labels`の直後（上）に配置し、`icon-allow-overlap`/
+    // `text-allow-overlap`をfalseにすることで、両レイヤー間で共有される
+    // 衝突判定により路線名ラベルとの重なりを回避する。
     {
       id: "route-number-badges",
       type: "symbol",
       source: "lines",
       "source-layer": "lines",
+      filter: ["has", "route_number"],
       layout: {
         "symbol-placement": "line",
         "symbol-spacing": 300,

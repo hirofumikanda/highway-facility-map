@@ -4,7 +4,7 @@
 
 ## 2. `route_number`非存在時の非表示を明示化する（Issue: #74）
 
-- [ ] 2.1 `site/style/map-style.js`の`route-number-badges`レイヤーに`filter: ["has", "route_number"]`を追加する（決定3で`route_category`条件と統合する場合は`"all"`でまとめる）。
+- [x] 2.1 `site/style/map-style.js`の`route-number-badges`レイヤーに`filter: ["has", "route_number"]`を追加する（決定3で`route_category`条件と統合する場合は`"all"`でまとめる）。
 
 ## 3. `route_category`に応じた矩形／シールド形の描き分け（Issue: #75）
 
