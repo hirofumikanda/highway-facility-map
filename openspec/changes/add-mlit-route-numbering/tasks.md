@@ -1,9 +1,9 @@
 ## 1. 路線番号対応表の整備（Issue: #58）
 
 - [ ] 1.1 国土交通省「高速道路ナンバリング一覧」（`https://www.mlit.go.jp/road/sign/numbering/list/index.html`、関連ページ・リーフレットPDF等）を出典として、路線番号（E1〜E98、C系統等）ごとの案内路線名を書き起こす。
-- [ ] 1.2 書き起こした案内路線名を、`geojson/N06-25_HighwaySection.geojson`の法定路線名（`N06_007`、`route_category`が`1`〜`5`の314件中の該当分）と突き合わせ、法定路線名→`route_number`の対応を確定する。ナンバリング一覧側の区間但し書き（例：「（仙台港北～利府）」）がある場合は、対応する法定路線名の地物全体に同一の`route_number`を割り当てる（design.md Non-Goals）。
+- [ ] 1.2 書き起こした案内路線名を、`geojson/N06-25_HighwaySection.geojson`の法定路線名（`N06_007`、`route_category`が`1`〜`4`の該当分）と突き合わせ、法定路線名→`route_number`の対応を確定する。ナンバリング一覧側の区間但し書き（例：「（仙台港北～利府）」）がある場合は、対応する法定路線名の地物全体に同一の`route_number`を割り当てる（design.md Non-Goals）。`route_category`が`5`（指定都市高速道路）の法定路線名は、design.md 決定1aに従い「N号」表記の数字部分を抽出して対応を確定する。
 - [ ] 1.3 `pipeline/preprocess/route_numbers.py`を新設し、確定した対応（`ROUTE_NUMBERS`辞書、法定路線名→`route_number`、複数キーが同一値を持つことを許容）を実装する。出典・書き起こし方針をモジュールdocstringに記載する。
-- [ ] 1.4 対応表の各エントリを、国土交通省ナンバリング一覧の記載と突き合わせて目視確認する。
+- [ ] 1.4 対応表の各エントリを、`route_category`1〜4は国土交通省ナンバリング一覧の記載と、`route_category`5は法定路線名の「N号」表記と、それぞれ突き合わせて目視確認する。
 
 ## 2. パイプライン前処理: 路線番号付与ロジックの変更（Issue: #59）
 
