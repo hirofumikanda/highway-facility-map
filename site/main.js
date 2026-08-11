@@ -144,8 +144,9 @@ map.on("click", "lines-fill", (event) => {
   laneEl.textContent = `車線数: ${lane_count}`;
   container.append(nameEl, categoryEl, laneEl);
 
-  // 通称名がある路線にのみ、路線番号（例：E1）を表示する（design.md 決定3）。
-  if (common_name) {
+  // 路線番号（例：E1）が付与されている路線には、通称名の有無にかかわらず
+  // 表示する（design.md 決定4）。
+  if (route_number) {
     const routeNumberEl = document.createElement("div");
     routeNumberEl.textContent = `路線番号: ${route_number}`;
     container.append(routeNumberEl);
