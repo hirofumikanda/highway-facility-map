@@ -46,7 +46,9 @@
 
 ## 6. サイト: 路線ポップアップの路線番号表示条件変更（Issue: #63）
 
-- [ ] 6.1 `site/main.js`の路線ポップアップで、路線番号の表示条件を`if (common_name)`から`if (route_number)`に変更する。
+- [x] 6.1 `site/main.js`の路線ポップアップで、路線番号の表示条件を`if (common_name)`から`if (route_number)`に変更する。
+
+  実施結果: `if (common_name)`を`if (route_number)`に変更した。名称欄の表示ロジック（`common_name ?? route_name`）は変更していない。`node --check`で構文確認済み。ブラウザでの目視確認は、Issue #62と同様の環境制約（サンドボックス内でMapLibre GL JSのWebワーカーが読み込めない）により本タスクでは実施できず、動作確認Issue（#64）で改めて行う。
 
 ## 7. 動作確認（Issue: #64）
 
