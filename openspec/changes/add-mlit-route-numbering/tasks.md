@@ -18,7 +18,9 @@
 
 ## 3. パイプライン前処理の実行確認（Issue: #60）
 
-- [ ] 3.1 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/lines.current.geojson`に`route_number`が期待通り付与されること（`common_name`がない路線にも付与されること、`route_category`が`6`の路線に付与されないこと）を確認する。
+- [x] 3.1 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/lines.current.geojson`に`route_number`が期待通り付与されること（`common_name`がない路線にも付与されること、`route_category`が`6`の路線に付与されないこと）を確認する。
+
+  実施結果: `bash pipeline/preprocess/run.sh`実行後の`pipeline/output/lines.current.geojson`をスクリプトで検証。`common_name`なしで`route_number`が付与された地物381件（例：伊豆縦貫自動車道→E70、高知東部自動車道→E55）、`route_category`が`6`で`route_number`が付与された地物0件、`common_name`・`route_number`両方付与された地物120件（`common_name`全件と一致）、`route_number`付与件数のカテゴリ別内訳は`{1: 273, 2: 17, 3: 39, 4: 8, 5: 164}`（合計501件、カテゴリ6は0件）。複数の法定路線名が同一`route_number`にまとまる例（`仙台北部道路`・`仙台東部道路`・`常磐自動車道`→E6）も確認した。
 
 ## 4. タイル生成・配置（Issue: #61）
 
