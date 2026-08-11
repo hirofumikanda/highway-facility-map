@@ -428,6 +428,22 @@ export const mapStyle = {
         // マーカー（円）の下にラベルを配置し、重ならないようにする
         "text-anchor": "top",
         "text-offset": [0, 0.6],
+        // ラベル同士が重なる場合の配置優先順位（値が小さいほど優先される、
+        // MapLibre仕様）。ジャンクションはsymbolrank（1〜3、値が小さいほど
+        // 上位）をそのまま使用する。一般IC・スマートIC・その他には、既存の
+        // 地点種別間の優先順位（ジャンクション＞一般IC＞スマートIC＞その他）
+        // を保つ固定値を割り当てる（add-jct-symbolrank design.md 決定4）。
+        "symbol-sort-key": [
+          "match",
+          ["get", "point_type"],
+          "3",
+          ["coalesce", ["get", "symbolrank"], 3],
+          "1",
+          4,
+          "2",
+          5,
+          6,
+        ],
         "text-allow-overlap": false,
         "text-optional": true,
       },
