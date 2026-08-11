@@ -24,9 +24,13 @@
 
 ## 4. タイル生成・配置（Issue: #61）
 
-- [ ] 4.1 `./pipeline/build.sh`を実行し、`pipeline/output/lines.pmtiles`を再生成する。
-- [ ] 4.2 `pipeline/tilegen/verify_tiles.py`で`route_number`属性がタイル内に保持されていることを確認する。
-- [ ] 4.3 再生成した`site/tiles/lines.pmtiles`を配置する。
+- [x] 4.1 `./pipeline/build.sh`を実行し、`pipeline/output/lines.pmtiles`を再生成する。
+- [x] 4.2 `pipeline/tilegen/verify_tiles.py`で`route_number`属性がタイル内に保持されていることを確認する。
+
+  実施結果: `verify_tiles.py`に、`route_number`属性の保持件数（ズームごと）・z14での存在確認・`common_name`なしで`route_number`を保持する地物の存在確認（route_numberの独立解決の確認）を追加した。`bash pipeline/build.sh`実行で全検証OK。z14で`route_number`属性を保持する路線地物数3,998件（`common_name`属性1,207件を上回り、独立して解決されていることを確認）。
+- [x] 4.3 再生成した`site/tiles/lines.pmtiles`を配置する。
+
+  実施結果: `pipeline/tilegen/deploy.sh`（`build.sh`に含まれる）により`site/tiles/lines.pmtiles`を配置した。
 
 ## 5. サイト: 路線番号のライン沿い表示（Issue: #62）
 
