@@ -112,10 +112,13 @@ MapLibre GL JSには背景色付きテキストを直接指定するプロパテ
 
 - `layout.symbol-placement: "line"`・`symbol-spacing`で、`route-labels`同様
   ライン沿いに一定間隔でシンボルを配置する。
-- 1x1のSDF（signed distance field）画像を`map.addImage`でスタイルに登録し、
-  `icon-image`として参照する。`icon-text-fit: "both"`・`icon-text-fit-padding`
-  により、アイコン（矩形）が`text-field`（`route_number`）の描画サイズに
-  自動追従する。
+- 全ピクセルが最大値（255＝完全に内側）の8x8 SDF（signed distance field）
+  画像を`map.addImage`でスタイルに登録し、`icon-image`として参照する。
+  `icon-text-fit: "both"`・`icon-text-fit-padding`により、アイコン（矩形）が
+  `text-field`（`route_number`）の描画サイズに自動追従する。実装時の実機
+  確認で、1x1画像はレンダラーのSDFサンプリングで縁が正しく評価されず描画
+  されない（テキストのみ表示され背景が透明になる）ことが判明したため、
+  8x8を採用した（8x8では正しく矩形背景が描画されることを確認済み）。
 - `paint.icon-color`に、路線本体のケーシング／塗り（`CASING_COLOR`／
   `FILL_COLOR`、`#1b7a3d`〜`#8fae91`系統）のいずれとも異なる、固定の濃い緑
   （例：`#0a5c34`。ズーム・`route_category`によらず単色）を指定し、
