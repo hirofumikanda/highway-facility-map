@@ -107,18 +107,24 @@ const ROUTE_NUMBER_BADGE_COLOR = "#0a5c34";
 // route-number-badgesレイヤーの`icon-image`として参照するSDF画像のID。
 export const ROUTE_NUMBER_BADGE_IMAGE_ID = "route-number-badge";
 
-// 矩形バッジ用の1x1 SDF画像を生成し、`map.addImage`でスタイルに登録する。
+// 矩形バッジ用のSDF画像を生成し、`map.addImage`でスタイルに登録する。
 // SDF画像はアルファチャンネルを距離値として扱われるため、全ピクセルを
 // 最大値（255＝完全に内側）にすることで、`icon-text-fit: "both"`により
 // テキストサイズへ拡縮されたときに単色の矩形として描画される
 // （design.md 決定3）。`icon-color`（`ROUTE_NUMBER_BADGE_COLOR`）で着色する。
+// 1x1画像はレンダラーのSDFサンプリングで縁が正しく評価されず描画されない
+// ことを確認したため、8x8の一様画像を使用する（実装時に実機確認）。
+const ROUTE_NUMBER_BADGE_IMAGE_SIZE = 8;
+
 export function registerRouteNumberBadgeImage(map) {
   if (map.hasImage(ROUTE_NUMBER_BADGE_IMAGE_ID)) {
     return;
   }
+  const pixelCount = ROUTE_NUMBER_BADGE_IMAGE_SIZE * ROUTE_NUMBER_BADGE_IMAGE_SIZE;
+  const data = new Uint8Array(pixelCount * 4).fill(255);
   map.addImage(
     ROUTE_NUMBER_BADGE_IMAGE_ID,
-    { width: 1, height: 1, data: new Uint8Array([255, 255, 255, 255]) },
+    { width: ROUTE_NUMBER_BADGE_IMAGE_SIZE, height: ROUTE_NUMBER_BADGE_IMAGE_SIZE, data },
     { sdf: true },
   );
 }

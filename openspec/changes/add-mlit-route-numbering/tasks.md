@@ -36,13 +36,13 @@
 
 - [x] 5.1 `site/style/map-style.js`に、矩形バッジ用のSDF画像を生成し`map.addImage`で登録する処理を追加する。
 
-  実施結果: `registerRouteNumberBadgeImage(map)`を新設し、1x1・アルファ値255（SDFの「内側」閾値192〜255の範囲内）の画像を`map.addImage(..., { sdf: true })`で登録するようにした。`site/main.js`の`map.on("load", ...)`から呼び出す（画像登録はスタイル読み込み完了後にのみ可能なため）。
+  実施結果: `registerRouteNumberBadgeImage(map)`を新設し、8x8・アルファ値255（SDFの「内側」閾値192〜255の範囲内）の画像を`map.addImage(..., { sdf: true })`で登録するようにした。`site/main.js`の`map.on("load", ...)`から呼び出す（画像登録はスタイル読み込み完了後にのみ可能なため）。当初1x1画像で実装したが、Issue #64での実機確認でレンダラーのSDFサンプリングにより背景が描画されない不具合を発見し、8x8に修正した（design.md 決定3更新）。
 - [x] 5.2 `route-number-badges`シンボルレイヤーを追加する（`symbol-placement: "line"`・`symbol-spacing`によるライン沿い一定間隔配置、`icon-image`＋`icon-text-fit: "both"`による矩形背景、`text-field: ["get", "route_number"]`、`text-color: "#ffffff"`、路線本体の`CASING_COLOR`／`FILL_COLOR`とは異なる固定の緑を`icon-color`に設定）。レイヤー順は`route-labels`の直後（上）に配置する。
 
   実施結果: `route-number-badges`レイヤーを`route-labels`の直後に追加し、`icon-color`に`CASING_COLOR`・`FILL_COLOR`のいずれとも異なる固定色`#0a5c34`を設定した。`route_number`が存在しない地物は`text-field`が空になりシンボルが描画されない。
 - [x] 5.3 `icon-allow-overlap: false`・`text-allow-overlap: false`を設定し、既存の`route-labels`との重なりが衝突検出で回避されることを確認する。
 
-  実施結果: 両プロパティを`false`に設定した。検証は以下の方法で行った：(1) `@maplibre/maplibre-gl-style-spec`の`validateStyleMin`でスタイル定義がMapLibreスタイル仕様に適合することを確認、(2) `npx serve site`でローカル起動しPlaywright（Chromium）で実地物確認を試みたが、このサンドボックス環境ではMapLibre GL JSがBlob URL経由で生成するWebワーカーの読み込みが`ERR_FILE_NOT_FOUND`で失敗し（`route-labels`等の既存レイヤーも含め、環境起因でどのレイヤーも描画されない制約と判明。コード変更由来の問題ではない）、ブラウザでの目視確認はできなかった。衝突回避の仕組み自体は`route-labels`と同一の方式（`symbol-placement: "line"`・`allow-overlap: false`、MapLibreの共有衝突判定）を踏襲しており、ブラウザでの最終確認はタスク7（動作確認、Issue #64）で改めて行う。
+  実施結果: 両プロパティを`false`に設定した。PR作成時点では環境制約によりブラウザでの目視確認ができなかったが、Issue #64（動作確認）でChromiumの起動オプション（`--single-process`）を調整して描画に成功し、`舞鶴若狭自動車道`（E27）で路線名ラベルと路線番号バッジが重ならずに配置されることを実際に確認した。
 
 ## 6. サイト: 路線ポップアップの路線番号表示条件変更（Issue: #63）
 
@@ -52,8 +52,21 @@
 
 ## 7. 動作確認（Issue: #64）
 
-- [ ] 7.1 `npx serve site`でローカル起動し、`common_name`を持つ路線（従来通り路線番号バッジ・ポップアップ路線番号が表示される）を確認する。
-- [ ] 7.2 `common_name`を持たないが今回`route_number`が付与された路線（路線番号バッジ・ポップアップ路線番号が新たに表示される）を確認する。
-- [ ] 7.3 路線番号バッジの背景色が、路線本体のケーシング・塗り色と目視で区別できることを確認する。
-- [ ] 7.4 路線名ラベルと路線番号バッジが近接する箇所で、重なりが回避されていることを確認する。
-- [ ] 7.5 `route_number`が付与されていない路線（`route_category`が`6`等）で、バッジ・ポップアップ路線番号のいずれも表示されないことを確認する。
+- [x] 7.1 `npx serve site`でローカル起動し、`common_name`を持つ路線（従来通り路線番号バッジ・ポップアップ路線番号が表示される）を確認する。
+- [x] 7.2 `common_name`を持たないが今回`route_number`が付与された路線（路線番号バッジ・ポップアップ路線番号が新たに表示される）を確認する。
+- [x] 7.3 路線番号バッジの背景色が、路線本体のケーシング・塗り色と目視で区別できることを確認する。
+- [x] 7.4 路線名ラベルと路線番号バッジが近接する箇所で、重なりが回避されていることを確認する。
+- [x] 7.5 `route_number`が付与されていない路線（`route_category`が`6`等）で、バッジ・ポップアップ路線番号のいずれも表示されないことを確認する。
+
+  実施結果: これまでブラウザでの目視確認ができなかった環境制約（サンドボックス内でMapLibre GL JSのWebワーカーがBlob URL経由で読み込めない）を、Chromiumの起動オプションに`--single-process`を追加することで回避し、`npx serve site`でのブラウザ実描画確認に初めて成功した。
+
+  確認過程で、路線番号バッジの背景（矩形）が描画されない不具合を発見した：1x1のSDF画像はレンダラーのSDFサンプリングで正しく評価されず、テキストのみが表示され背景（`icon-color`の矩形）が透明になっていた。8x8の一様画像に修正したところ正しく矩形背景が描画されることを確認し、`site/style/map-style.js`・design.md 決定3を修正した（本タスクの一部として実施）。
+
+  修正後、以下をスクリーンショットで確認済み：
+  - 7.1: `common_name`を持つ路線（`近畿自動車道敦賀線`＝`舞鶴若狭自動車道`）で、従来通りの緑系統ラベルに加え、濃い緑背景×白字の`E27`バッジがライン沿いに表示される
+  - 7.2: `common_name`を持たない`伊豆縦貫自動車道`（`route_number`のみ付与）で、`E70`バッジが新たに表示される
+  - 7.3: バッジの背景色（`#0a5c34`）が、路線本体のケーシング・塗り（`CASING_COLOR`/`FILL_COLOR`系統の薄い緑）と目視で明確に区別できる
+  - 7.4: `舞鶴若狭自動車道`のラベルと`E27`バッジが近接する箇所で、重ならずに配置される
+  - 7.5: `route_number`が対応表に存在しない`唐桑道路`で、路線名ラベル（`route_name`フォールバック）は表示されるがバッジは表示されない
+
+  ポップアップ（`route_number`表示条件変更、Issue #63）も実際にクリック操作をシミュレートして確認した。`伊豆縦貫自動車道`（`common_name`なし）をクリックすると、ポップアップに「伊豆縦貫自動車道 / 一般国道の自専道 / 車線数: 2 / 路線番号: E70」が表示され、`common_name`がなくても`route_number`が表示されることを確認した。
