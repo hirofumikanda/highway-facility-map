@@ -2,3 +2,4 @@
 *.mbtiles
 *.xml
 /pipeline/output/*.pmtiles
+__pycache__/
