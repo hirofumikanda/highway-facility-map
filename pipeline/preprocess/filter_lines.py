@@ -14,27 +14,66 @@
   `route_name`が`route_numbers.ROUTE_NUMBERS`にヒットする地物に、`common_name`の
   有無にかかわらず付与する。
 
-OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes, add-mlit-route-numbering
-tasks.md: 2.1, 2.2 / 2.1 / 2.1
+各路線地物には、ジオメトリの始点・終点座標に空間的に一致する接合部の地点名
+（`N06_018`）を`start_point_name`・`end_point_name`として付与する
+（add-joint-based-route-matching design.md 決定2）。現況路線地物の`geometry`は
+いずれも単一パートの`MultiLineString`（`coordinates`の要素数は常に1）である
+ことをデータ確認済みのため、最初のパートの最初・最後の座標を始点・終点として
+扱う。
+
+OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-joint-based-route-matching
+tasks.md: 2.1, 2.2 / 2.1 / 2.1 / 2.1, 2.2, 2.3
 """
 import json
 from pathlib import Path
 
+from shapely.geometry import Point, shape
+
+from filter_points import POINT_TYPE_MINZOOM
 from route_common_names import ROUTE_COMMON_NAMES
 from route_numbers import ROUTE_NUMBERS
+from spatial_match import matching_values
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = REPO_ROOT / "geojson" / "N06-25_HighwaySection.geojson"
+JOINT_INPUT_PATH = REPO_ROOT / "geojson" / "N06-25_Joint.geojson"
 OUTPUT_PATH = REPO_ROOT / "pipeline" / "output" / "lines.current.geojson"
 
 CURRENT_END_YEAR = 9999
+JOINT_END_YEAR_FIELD = "N06_014"
 
 # route_numberの解決対象とする路線種別区分（design.md 決定1・決定2）。
 # 6（その他）は対象外。
 ROUTE_NUMBER_CATEGORIES = {"1", "2", "3", "4", "5"}
 
 
-def filter_current_lines(source):
+def load_joint_geometries(joint_source):
+    """現況接合部地物ごとの(ジオメトリ, (接合部種別, 地点名))のリストを構築する。"""
+    return [
+        (shape(feature["geometry"]), (props.get("N06_019"), props.get("N06_018")))
+        for feature in joint_source["features"]
+        if (props := feature["properties"]).get(JOINT_END_YEAR_FIELD) == CURRENT_END_YEAR
+    ]
+
+
+def endpoint_joint_name(point_geom, joint_geometries):
+    """路線の端点座標に空間的に一致する接合部の地点名を1件解決する。
+
+    一致する接合部が存在しない場合は`None`を返す。同一座標に複数の接合部が
+    一致する場合、接合部種別の重要度順（ジャンクション＞一般IC＞スマートIC＞
+    その他の接合部、`filter_points.py`の`POINT_TYPE_MINZOOM`と同じ順序）で
+    最も重要度の高い接合部を採用する（design.md 決定2）。
+    """
+    matches = matching_values(point_geom, joint_geometries)
+    if not matches:
+        return None
+    point_type, point_name = min(
+        matches, key=lambda match: POINT_TYPE_MINZOOM[match[0]]
+    )
+    return point_name
+
+
+def filter_current_lines(source, joint_geometries):
     features = []
     for feature in source["features"]:
         props = feature["properties"]
@@ -54,6 +93,19 @@ def filter_current_lines(source):
             route_number = ROUTE_NUMBERS.get(route_name)
             if route_number is not None:
                 properties["route_number"] = route_number
+
+        line_coords = feature["geometry"]["coordinates"][0]
+        start_point_name = endpoint_joint_name(
+            Point(line_coords[0]), joint_geometries
+        )
+        if start_point_name is not None:
+            properties["start_point_name"] = start_point_name
+        end_point_name = endpoint_joint_name(
+            Point(line_coords[-1]), joint_geometries
+        )
+        if end_point_name is not None:
+            properties["end_point_name"] = end_point_name
+
         features.append(
             {
                 "type": "Feature",
@@ -67,8 +119,11 @@ def filter_current_lines(source):
 def main():
     with open(INPUT_PATH, encoding="utf-8") as f:
         source = json.load(f)
+    with open(JOINT_INPUT_PATH, encoding="utf-8") as f:
+        joint_source = json.load(f)
 
-    result = filter_current_lines(source)
+    joint_geometries = load_joint_geometries(joint_source)
+    result = filter_current_lines(source, joint_geometries)
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
