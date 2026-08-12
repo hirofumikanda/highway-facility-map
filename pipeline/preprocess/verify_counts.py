@@ -11,8 +11,14 @@
   - 現況地点: 2,384件（ジャンクション245 / 一般IC1,942 / スマートIC164 / その他33）
   - ジャンクションのsymbolrank: 1が79件 / 2が93件 / 3が73件
 
-OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank
-tasks.md: 2.5 / 2.2 / 2.1
+`start_point_name`・`end_point_name`の付与件数、および始点・終点接合部・
+通称名を用いた追加解決（add-joint-based-route-matching design.md 決定3・
+決定4）により解決された`common_name`・`route_number`の件数は、対応表の拡充に
+伴って変動しうるため、期待値と一致するかのチェックではなく参考情報として
+出力する。
+
+OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank, add-joint-based-route-matching
+tasks.md: 2.5 / 2.2 / 2.1 / 5.1
 """
 import json
 import sys
@@ -20,7 +26,10 @@ from collections import Counter
 from pathlib import Path
 
 from filter_points import JCT_SYMBOLRANK_MINZOOM
+from route_common_names import ROUTE_COMMON_NAMES
+from route_common_names_by_endpoints import ROUTE_COMMON_NAMES_BY_ENDPOINTS
 from route_numbers import ROUTE_NUMBERS
+from route_numbers_by_common_name import ROUTE_NUMBERS_BY_COMMON_NAME
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LINES_PATH = REPO_ROOT / "pipeline" / "output" / "lines.current.geojson"
@@ -79,15 +88,53 @@ def main():
         if not isinstance(f["properties"].get("lane_count"), int)
     )
     check(ok_flags, "lane_count属性の欠落件数", missing_lane_count, 0)
+    start_point_name_count = sum(
+        1 for f in lines["features"] if "start_point_name" in f["properties"]
+    )
+    end_point_name_count = sum(
+        1 for f in lines["features"] if "end_point_name" in f["properties"]
+    )
+    print(f"[INFO] start_point_nameが付与された路線地物数: {start_point_name_count}")
+    print(f"[INFO] end_point_nameが付与された路線地物数: {end_point_name_count}")
+
     common_name_count = sum(
         1 for f in lines["features"] if "common_name" in f["properties"]
     )
+    common_name_by_endpoints_count = sum(
+        1
+        for f in lines["features"]
+        if "common_name" in f["properties"]
+        and f["properties"]["route_name"] not in ROUTE_COMMON_NAMES
+    )
     print(f"[INFO] common_nameが付与された路線地物数: {common_name_count}")
+    print(
+        "[INFO] 始点・終点接合部による追加解決でcommon_nameが付与された路線地物数: "
+        f"{common_name_by_endpoints_count}"
+    )
+
     route_number_count = sum(
         1 for f in lines["features"] if "route_number" in f["properties"]
     )
+    route_number_by_common_name_count = sum(
+        1
+        for f in lines["features"]
+        if "route_number" in f["properties"]
+        and f["properties"]["route_name"] not in ROUTE_NUMBERS
+    )
     print(f"[INFO] ROUTE_NUMBERS対応表のエントリ数: {len(ROUTE_NUMBERS)}")
     print(f"[INFO] route_numberが付与された路線地物数: {route_number_count}")
+    print(
+        "[INFO] 通称名による追加解決でroute_numberが付与された路線地物数: "
+        f"{route_number_by_common_name_count}"
+    )
+    print(
+        "[INFO] ROUTE_COMMON_NAMES_BY_ENDPOINTS対応表のエントリ数: "
+        f"{sum(len(entries) for entries in ROUTE_COMMON_NAMES_BY_ENDPOINTS.values())}"
+    )
+    print(
+        "[INFO] ROUTE_NUMBERS_BY_COMMON_NAME対応表のエントリ数: "
+        f"{len(ROUTE_NUMBERS_BY_COMMON_NAME)}"
+    )
 
     with open(POINTS_PATH, encoding="utf-8") as f:
         points = json.load(f)
