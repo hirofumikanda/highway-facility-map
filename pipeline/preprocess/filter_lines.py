@@ -21,8 +21,14 @@
 ことをデータ確認済みのため、最初のパートの最初・最後の座標を始点・終点として
 扱う。
 
+法定路線名による`ROUTE_COMMON_NAMES`照合で`common_name`が解決されなかった
+路線地物のうち、`route_category`が`1`であり、`start_point_name`・
+`end_point_name`が両方付与されているものについては、
+`route_common_names_by_endpoints.ROUTE_COMMON_NAMES_BY_ENDPOINTS`との追加照合
+により`common_name`を解決する（add-joint-based-route-matching design.md 決定3）。
+
 OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-joint-based-route-matching
-tasks.md: 2.1, 2.2 / 2.1 / 2.1 / 2.1, 2.2, 2.3
+tasks.md: 2.1, 2.2 / 2.1 / 2.1 / 2.1, 2.2, 2.3, 3.1, 3.2, 3.3
 """
 import json
 from pathlib import Path
@@ -31,6 +37,7 @@ from shapely.geometry import Point, shape
 
 from filter_points import POINT_TYPE_MINZOOM
 from route_common_names import ROUTE_COMMON_NAMES
+from route_common_names_by_endpoints import ROUTE_COMMON_NAMES_BY_ENDPOINTS
 from route_numbers import ROUTE_NUMBERS
 from spatial_match import matching_values
 
@@ -73,6 +80,22 @@ def endpoint_joint_name(point_geom, joint_geometries):
     return point_name
 
 
+def endpoint_common_name(route_name, start_point_name, end_point_name):
+    """始点・終点接合部名の組から、追加対応表で`common_name`を解決する。
+
+    `route_name`が対応表に存在しない場合、または始点・終点接合部名の組に
+    一致するエントリがない場合は`None`を返す（design.md 決定3）。
+    """
+    entries = ROUTE_COMMON_NAMES_BY_ENDPOINTS.get(route_name)
+    if entries is None:
+        return None
+    points = frozenset({start_point_name, end_point_name})
+    for entry in entries:
+        if entry["points"] == points:
+            return entry["common_name"]
+    return None
+
+
 def filter_current_lines(source, joint_geometries):
     features = []
     for feature in source["features"]:
@@ -86,13 +109,6 @@ def filter_current_lines(source, joint_geometries):
             "route_category": route_category,
             "lane_count": int(props.get("N06_010")),
         }
-        common_name_entry = ROUTE_COMMON_NAMES.get(route_name)
-        if common_name_entry is not None:
-            properties["common_name"] = common_name_entry["common_name"]
-        if route_category in ROUTE_NUMBER_CATEGORIES:
-            route_number = ROUTE_NUMBERS.get(route_name)
-            if route_number is not None:
-                properties["route_number"] = route_number
 
         line_coords = feature["geometry"]["coordinates"][0]
         start_point_name = endpoint_joint_name(
@@ -105,6 +121,25 @@ def filter_current_lines(source, joint_geometries):
         )
         if end_point_name is not None:
             properties["end_point_name"] = end_point_name
+
+        common_name_entry = ROUTE_COMMON_NAMES.get(route_name)
+        if common_name_entry is not None:
+            properties["common_name"] = common_name_entry["common_name"]
+        elif (
+            route_category == "1"
+            and start_point_name is not None
+            and end_point_name is not None
+        ):
+            endpoint_common_name_value = endpoint_common_name(
+                route_name, start_point_name, end_point_name
+            )
+            if endpoint_common_name_value is not None:
+                properties["common_name"] = endpoint_common_name_value
+
+        if route_category in ROUTE_NUMBER_CATEGORIES:
+            route_number = ROUTE_NUMBERS.get(route_name)
+            if route_number is not None:
+                properties["route_number"] = route_number
 
         features.append(
             {

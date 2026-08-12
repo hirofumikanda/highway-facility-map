@@ -11,9 +11,9 @@
 
 ## 3. 始点・終点接合部による通称名の追加解決（Issue: #93）
 
-- [ ] 3.1 `pipeline/preprocess/route_common_names_by_endpoints.py`を新設し、法定路線名→`{始点・終点接合部名の組（順不同）, 通称名}`のリストを保持する`ROUTE_COMMON_NAMES_BY_ENDPOINTS`を定義する
-- [ ] 3.2 法定路線名が複数の通称名区間に分かれるため`ROUTE_COMMON_NAMES`から除外されている法定路線名（`北海道横断自動車道黒松内釧路線`等）を対象に、Wikipedia等の出典で各区間の境界接合部を確認し、確認できた範囲でエントリを収録する（出典・確認日をコード内コメントに明記する。全件の網羅は本変更のスコープ外）
-- [ ] 3.3 `filter_lines.py`で、法定路線名による`ROUTE_COMMON_NAMES`照合がヒットせず、`route_category`が`1`であり、`start_point_name`・`end_point_name`が両方付与されている路線地物に対して、`ROUTE_COMMON_NAMES_BY_ENDPOINTS`との追加照合を行い、ヒットした場合に`common_name`を付与する
+- [x] 3.1 `pipeline/preprocess/route_common_names_by_endpoints.py`を新設し、法定路線名→`{始点・終点接合部名の組（順不同）, 通称名}`のリストを保持する`ROUTE_COMMON_NAMES_BY_ENDPOINTS`を定義する
+- [x] 3.2 法定路線名が複数の通称名区間に分かれるため`ROUTE_COMMON_NAMES`から除外されている法定路線名（`北海道横断自動車道黒松内釧路線`等）を対象に、Wikipedia等の出典で各区間の境界接合部を確認し、確認できた範囲でエントリを収録する（出典・確認日をコード内コメントに明記する。全件の網羅は本変更のスコープ外）
+- [x] 3.3 `filter_lines.py`で、法定路線名による`ROUTE_COMMON_NAMES`照合がヒットせず、`route_category`が`1`であり、`start_point_name`・`end_point_name`が両方付与されている路線地物に対して、`ROUTE_COMMON_NAMES_BY_ENDPOINTS`との追加照合を行い、ヒットした場合に`common_name`を付与する
 
 ## 4. 通称名による路線番号の追加解決（Issue: #94）
 
