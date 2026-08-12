@@ -31,6 +31,9 @@ $ ./pipeline/preprocess/run.sh
 
 ## スクリプト
 
+- `spatial_match.py` — 地点・路線間の座標一致判定（距離閾値
+  `CONNECTION_DISTANCE_THRESHOLD_DEGREES`とShapelyによる距離判定）を行う
+  共通ロジック。`filter_points.py`（地点→接続路線の車線数の解決）から利用する
 - `route_common_names.py` — Wikipedia「高速自動車国道」ページの一覧表を出典に、
   法定路線名が単一の通称名に一意対応する路線のみを収録した静的対応表
   （`ROUTE_COMMON_NAMES`辞書、`common_name`の解決にのみ用いる）
@@ -46,10 +49,11 @@ $ ./pipeline/preprocess/run.sh
   には、`common_name`の有無にかかわらず`route_number`（路線番号、例：E1・3）を
   付与する（いずれもヒットしない場合は各属性を付与しない）
 - `filter_points.py` — 現況地点を抽出し、`point_name`（地点名）・
-  `point_type`（接合部種別コード）・`lane_counts`（地点座標とライン地物の頂点
-  一致判定により空間的に接続すると判定した路線の`lane_count`を昇順ソートした
-  配列。重複は排除せず、接続する路線の数だけ値を保持する。例えば車線数4の
-  路線が2本接続するJCTでは`[4, 4]`になる）を保持しつつ、種別ごとの
+  `point_type`（接合部種別コード）・`lane_counts`（地点座標とライン地物の
+  `spatial_match.py`による座標一致判定で空間的に接続すると判定した路線の
+  `lane_count`を昇順ソートした配列。重複は排除せず、接続する路線の数だけ値を
+  保持する。例えば車線数4の路線が2本接続するJCTでは`[4, 4]`になる）を保持
+  しつつ、種別ごとの
   tippecanoe`minzoom`（ジャンクション=8 / 一般IC=10 / スマートIC=12 /
   その他=14）を付与した `../output/points.current.geojson` を書き出す
 - `verify_counts.py` — 上記2ファイルの件数・内訳・minzoom付与・`lane_count`/
@@ -65,6 +69,6 @@ $ ./pipeline/preprocess/run.sh
 
 出力ファイルは`.gitignore`（`*.geojson`）により Git 管理対象外。
 
-- OpenSpec Change: `highway-facility-map`, `add-mlit-route-numbering`
+- OpenSpec Change: `highway-facility-map`, `add-mlit-route-numbering`, `add-joint-based-route-matching`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-tile-pipeline/spec.md`
-- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59）
+- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91）

@@ -1,7 +1,7 @@
 ## 1. 空間一致判定ロジックの共通化（Issue: #91）
 
-- [ ] 1.1 `pipeline/preprocess/spatial_match.py`を新設し、`filter_points.py`が持つ座標一致判定ロジック（`CONNECTION_DISTANCE_THRESHOLD_DEGREES`とShapelyによる距離判定）を切り出す
-- [ ] 1.2 `filter_points.py`を、新設した共通ロジックを利用する形にリファクタリングする（既存の挙動・出力を変えない）
+- [x] 1.1 `pipeline/preprocess/spatial_match.py`を新設し、`filter_points.py`が持つ座標一致判定ロジック（`CONNECTION_DISTANCE_THRESHOLD_DEGREES`とShapelyによる距離判定）を切り出す
+- [x] 1.2 `filter_points.py`を、新設した共通ロジックを利用する形にリファクタリングする（既存の挙動・出力を変えない）
 
 ## 2. 路線への始点・終点接合部名の付与（Issue: #92）
 

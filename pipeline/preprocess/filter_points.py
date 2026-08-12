@@ -15,13 +15,18 @@ minzoomの割り当ては design.md の「決定5」に基づく設計値であ�
 `symbolrank`（1〜3、値が小さいほど上位）を付与し、`symbolrank`から細分化した
 minzoom（8/9/10）を用いる（add-jct-symbolrank design.md 決定1〜3）。
 
-OpenSpec Change: highway-facility-map, add-jct-symbolrank
-tasks.md: 2.3, 2.4 / 1.1, 1.2
+地点座標とライン地物の座標一致判定は`spatial_match.py`の共通ロジックを用いる
+（add-joint-based-route-matching design.md 決定1）。
+
+OpenSpec Change: highway-facility-map, add-jct-symbolrank, add-joint-based-route-matching
+tasks.md: 2.3, 2.4 / 1.1, 1.2 / 1.2
 """
 import json
 from pathlib import Path
 
 from shapely.geometry import shape
+
+from spatial_match import matching_values
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH = REPO_ROOT / "geojson" / "N06-25_Joint.geojson"
@@ -29,11 +34,6 @@ LINES_PATH = REPO_ROOT / "pipeline" / "output" / "lines.current.geojson"
 OUTPUT_PATH = REPO_ROOT / "pipeline" / "output" / "points.current.geojson"
 
 CURRENT_END_YEAR = 9999
-
-# 地点座標とライン地物の頂点一致判定に用いる距離閾値（度）。約0.1m相当
-# （design.md 決定4）。国土数値情報の同一整備由来データで座標が実質一致する
-# ため、頂点一致判定で十分と考える。
-CONNECTION_DISTANCE_THRESHOLD_DEGREES = 1e-6
 
 # N06_019（接合部種別コード） -> tippecanoeの地物単位minzoom
 # ジャンクション(3) > 一般IC(1) > スマートIC(2) > その他(4) の重要度順に、
@@ -81,12 +81,7 @@ def connected_lane_counts(point_geom, line_geometries):
     同じ車線数を持つ路線が複数接続する場合（主にJCT）も、接続する路線の数だけ
     値を保持する（design.md 決定4）。
     """
-    matched = [
-        lane_count
-        for line_geom, lane_count in line_geometries
-        if point_geom.distance(line_geom) <= CONNECTION_DISTANCE_THRESHOLD_DEGREES
-    ]
-    return sorted(matched)
+    return sorted(matching_values(point_geom, line_geometries))
 
 
 def filter_current_points(source, line_geometries):
