@@ -10,7 +10,9 @@
 （Wikipedia出典）を参照し、法定路線名が単一の通称名に一意対応する路線にのみ
 付与する。`route_number`は`route_numbers.py`（国土交通省ナンバリング一覧・
 指定都市高速道路は法定路線名からの抽出が出典）を参照し、路線種別区分が`1`〜`5`
-かつ対応表にヒットする路線に、`common_name`の有無にかかわらず付与する。
+かつ対応表にヒットする路線に、`common_name`の有無にかかわらず付与する。また、
+各路線地物には、ジオメトリの始点・終点座標に空間的に一致する接合部の地点名を
+`start_point_name`・`end_point_name`として付与する。
 
 ## 依存関係
 
@@ -47,7 +49,13 @@ $ ./pipeline/preprocess/run.sh
   `ROUTE_COMMON_NAMES`にヒットする地物には`common_name`（通称名）を付与する。
   `route_category`が`1`〜`5`かつ`route_name`が`ROUTE_NUMBERS`にヒットする地物
   には、`common_name`の有無にかかわらず`route_number`（路線番号、例：E1・3）を
-  付与する（いずれもヒットしない場合は各属性を付与しない）
+  付与する（いずれもヒットしない場合は各属性を付与しない）。また、ジオメトリの
+  始点・終点座標が`spatial_match.py`による座標一致判定で接合部（現況の
+  `N06-25_Joint.geojson`地物）と一致する場合、その接合部の地点名を
+  `start_point_name`・`end_point_name`として付与する（一致しない場合は
+  付与しない。同一座標に複数の接合部が一致する場合は、接合部種別の重要度順
+  ジャンクション＞一般IC＞スマートIC＞その他の接合部で最も重要度の高い接合部
+  を採用する）
 - `filter_points.py` — 現況地点を抽出し、`point_name`（地点名）・
   `point_type`（接合部種別コード）・`lane_counts`（地点座標とライン地物の
   `spatial_match.py`による座標一致判定で空間的に接続すると判定した路線の
@@ -71,4 +79,4 @@ $ ./pipeline/preprocess/run.sh
 
 - OpenSpec Change: `highway-facility-map`, `add-mlit-route-numbering`, `add-joint-based-route-matching`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-tile-pipeline/spec.md`
-- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91）
+- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91） / 2.1, 2.2, 2.3（GitHub Issue #92）
