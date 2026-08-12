@@ -17,9 +17,9 @@
 
 ## 4. 通称名による路線番号の追加解決（Issue: #94）
 
-- [ ] 4.1 `pipeline/preprocess/route_numbers_by_common_name.py`を新設し、通称名→路線番号の対応表`ROUTE_NUMBERS_BY_COMMON_NAME`を定義する
-- [ ] 4.2 法定路線名による`ROUTE_NUMBERS`照合が未解決の法定路線名のうち、（3章までの解決により）`common_name`が付与されるものを対象に、国土交通省「高速道路ナンバリング一覧」を通称名ベースで突き合わせ、確認できた範囲でエントリを収録する（出典・確認日をコード内コメントに明記する。全件の網羅は本変更のスコープ外）
-- [ ] 4.3 `filter_lines.py`で、法定路線名による`ROUTE_NUMBERS`照合がヒットせず、`route_category`が`1`から`5`のいずれかであり、`common_name`が付与されている路線地物に対して、`ROUTE_NUMBERS_BY_COMMON_NAME`との追加照合を行い、ヒットした場合に`route_number`を付与する
+- [x] 4.1 `pipeline/preprocess/route_numbers_by_common_name.py`を新設し、通称名→路線番号の対応表`ROUTE_NUMBERS_BY_COMMON_NAME`を定義する
+- [x] 4.2 法定路線名による`ROUTE_NUMBERS`照合が未解決の法定路線名のうち、（3章までの解決により）`common_name`が付与されるものを対象に、国土交通省「高速道路ナンバリング一覧」を通称名ベースで突き合わせ、確認できた範囲でエントリを収録する（出典・確認日をコード内コメントに明記する。全件の網羅は本変更のスコープ外）
+- [x] 4.3 `filter_lines.py`で、法定路線名による`ROUTE_NUMBERS`照合がヒットせず、`route_category`が`1`から`5`のいずれかであり、`common_name`が付与されている路線地物に対して、`ROUTE_NUMBERS_BY_COMMON_NAME`との追加照合を行い、ヒットした場合に`route_number`を付与する
 
 ## 5. 前処理パイプラインの検証（Issue: #95）
 

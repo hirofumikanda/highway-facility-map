@@ -15,7 +15,9 @@
 `start_point_name`・`end_point_name`として付与する。`ROUTE_COMMON_NAMES`で
 `common_name`が解決できない路線（法定路線名が複数の通称名区間に分かれる場合
 等）については、`route_common_names_by_endpoints.py`が保持する始点・終点接合部
-名を鍵とした対応表で追加解決する。
+名を鍵とした対応表で追加解決する。`ROUTE_NUMBERS`で`route_number`が解決できない
+路線についても、解決済みの`common_name`を鍵とした
+`route_numbers_by_common_name.py`の対応表で追加解決する。
 
 ## 依存関係
 
@@ -48,6 +50,11 @@ $ ./pipeline/preprocess/run.sh
   静的対応表（`ROUTE_COMMON_NAMES_BY_ENDPOINTS`辞書。`route_category`が`1`の
   路線が対象。現時点では確認できた範囲（北海道横断自動車道根室線・網走線）
   のみ収録）
+- `route_numbers_by_common_name.py` — `ROUTE_NUMBERS`が法定路線名では解決できない
+  路線について、国土交通省「高速道路ナンバリング一覧」を通称名ベースで突き合わせた
+  静的対応表（`ROUTE_NUMBERS_BY_COMMON_NAME`辞書、通称名→路線番号。
+  `route_category`が`1`〜`5`の路線が対象。現時点では確認できた範囲（後志・
+  札樽・道央・道東自動車道）のみ収録）
 - `route_numbers.py` — 路線種別区分が`1`〜`4`の路線は国土交通省「高速道路
   ナンバリング一覧」、`5`（指定都市高速道路）の路線は法定路線名に埋め込まれた
   「N号」表記の抽出を出典とする静的対応表（`ROUTE_NUMBERS`辞書、`route_number`
@@ -61,7 +68,9 @@ $ ./pipeline/preprocess/run.sh
   により`common_name`を解決する。
   `route_category`が`1`〜`5`かつ`route_name`が`ROUTE_NUMBERS`にヒットする地物
   には、`common_name`の有無にかかわらず`route_number`（路線番号、例：E1・3）を
-  付与する（いずれもヒットしない場合は各属性を付与しない）。また、ジオメトリの
+  付与する。ヒットしない場合、`common_name`が付与されている地物については、
+  `ROUTE_NUMBERS_BY_COMMON_NAME`との追加照合により`route_number`を解決する
+  （いずれもヒットしない場合は各属性を付与しない）。また、ジオメトリの
   始点・終点座標が`spatial_match.py`による座標一致判定で接合部（現況の
   `N06-25_Joint.geojson`地物）と一致する場合、その接合部の地点名を
   `start_point_name`・`end_point_name`として付与する（一致しない場合は
@@ -91,4 +100,4 @@ $ ./pipeline/preprocess/run.sh
 
 - OpenSpec Change: `highway-facility-map`, `add-mlit-route-numbering`, `add-joint-based-route-matching`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-tile-pipeline/spec.md`
-- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91） / 2.1, 2.2, 2.3（GitHub Issue #92） / 3.1, 3.2, 3.3（GitHub Issue #93）
+- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91） / 2.1, 2.2, 2.3（GitHub Issue #92） / 3.1, 3.2, 3.3（GitHub Issue #93） / 4.1, 4.2, 4.3（GitHub Issue #94）
