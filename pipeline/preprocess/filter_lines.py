@@ -27,8 +27,14 @@
 `route_common_names_by_endpoints.ROUTE_COMMON_NAMES_BY_ENDPOINTS`との追加照合
 により`common_name`を解決する（add-joint-based-route-matching design.md 決定3）。
 
+法定路線名による`ROUTE_NUMBERS`照合で`route_number`が解決されなかった路線
+地物のうち、`route_category`が`1`〜`5`のいずれかであり、`common_name`が
+（上記いずれかの経路により）付与されているものについては、
+`route_numbers_by_common_name.ROUTE_NUMBERS_BY_COMMON_NAME`との追加照合により
+`route_number`を解決する（add-joint-based-route-matching design.md 決定4）。
+
 OpenSpec Change: highway-facility-map, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-joint-based-route-matching
-tasks.md: 2.1, 2.2 / 2.1 / 2.1 / 2.1, 2.2, 2.3, 3.1, 3.2, 3.3
+tasks.md: 2.1, 2.2 / 2.1 / 2.1 / 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 4.1, 4.2, 4.3
 """
 import json
 from pathlib import Path
@@ -39,6 +45,7 @@ from filter_points import POINT_TYPE_MINZOOM
 from route_common_names import ROUTE_COMMON_NAMES
 from route_common_names_by_endpoints import ROUTE_COMMON_NAMES_BY_ENDPOINTS
 from route_numbers import ROUTE_NUMBERS
+from route_numbers_by_common_name import ROUTE_NUMBERS_BY_COMMON_NAME
 from spatial_match import matching_values
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -138,6 +145,10 @@ def filter_current_lines(source, joint_geometries):
 
         if route_category in ROUTE_NUMBER_CATEGORIES:
             route_number = ROUTE_NUMBERS.get(route_name)
+            if route_number is None:
+                common_name_value = properties.get("common_name")
+                if common_name_value is not None:
+                    route_number = ROUTE_NUMBERS_BY_COMMON_NAME.get(common_name_value)
             if route_number is not None:
                 properties["route_number"] = route_number
 
