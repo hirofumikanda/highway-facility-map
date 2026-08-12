@@ -121,7 +121,8 @@ map.on("mouseleave", "points", () => {
   map.getCanvas().style.cursor = "";
 });
 
-// 路線のクリック時に、路線名・路線種別名・車線数を表示するポップアップを出す。
+// 路線のクリック時に、法定名・通称名（存在時のみ）・種別・車線数・路線番号
+// （存在時のみ）をラベル付きで表示するポップアップを出す（design.md 決定6）。
 // 塗り部分（`lines-fill`、判定領域として最も広い）のみをリッスンし、
 // `lines-casing`には登録しない（同一地物で二重発火するため、design.md 決定2）。
 map.on("click", "lines-fill", (event) => {
@@ -142,13 +143,26 @@ map.on("click", "lines-fill", (event) => {
     feature.properties;
 
   const container = document.createElement("div");
-  const nameEl = document.createElement("div");
-  nameEl.textContent = common_name ?? route_name;
+
+  // 法定名は通称名の有無にかかわらず常に表示する（design.md 決定6）。
+  const routeNameEl = document.createElement("div");
+  routeNameEl.textContent = `法定名: ${route_name}`;
+  container.append(routeNameEl);
+
+  // 通称名（common_name）が付与されている路線にのみ表示する（design.md 決定6）。
+  if (common_name) {
+    const commonNameEl = document.createElement("div");
+    commonNameEl.textContent = `通称名: ${common_name}`;
+    container.append(commonNameEl);
+  }
+
   const categoryEl = document.createElement("div");
-  categoryEl.textContent = ROUTE_CATEGORY_LABELS[route_category] ?? route_category;
+  categoryEl.textContent = `種別: ${ROUTE_CATEGORY_LABELS[route_category] ?? route_category}`;
+  container.append(categoryEl);
+
   const laneEl = document.createElement("div");
   laneEl.textContent = `車線数: ${lane_count}`;
-  container.append(nameEl, categoryEl, laneEl);
+  container.append(laneEl);
 
   // 路線番号（例：E1）が付与されている路線には、通称名の有無にかかわらず
   // 表示する（design.md 決定4）。
