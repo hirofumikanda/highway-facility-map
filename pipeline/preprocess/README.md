@@ -12,7 +12,10 @@
 指定都市高速道路は法定路線名からの抽出が出典）を参照し、路線種別区分が`1`〜`5`
 かつ対応表にヒットする路線に、`common_name`の有無にかかわらず付与する。また、
 各路線地物には、ジオメトリの始点・終点座標に空間的に一致する接合部の地点名を
-`start_point_name`・`end_point_name`として付与する。
+`start_point_name`・`end_point_name`として付与する。`ROUTE_COMMON_NAMES`で
+`common_name`が解決できない路線（法定路線名が複数の通称名区間に分かれる場合
+等）については、`route_common_names_by_endpoints.py`が保持する始点・終点接合部
+名を鍵とした対応表で追加解決する。
 
 ## 依存関係
 
@@ -39,6 +42,12 @@ $ ./pipeline/preprocess/run.sh
 - `route_common_names.py` — Wikipedia「高速自動車国道」ページの一覧表を出典に、
   法定路線名が単一の通称名に一意対応する路線のみを収録した静的対応表
   （`ROUTE_COMMON_NAMES`辞書、`common_name`の解決にのみ用いる）
+- `route_common_names_by_endpoints.py` — 法定路線名が複数の通称名区間に分かれる
+  ため`ROUTE_COMMON_NAMES`から除外される路線について、Wikipedia個別路線記事を
+  出典に、区間の境界となる始点・終点接合部名の組から`common_name`を解決する
+  静的対応表（`ROUTE_COMMON_NAMES_BY_ENDPOINTS`辞書。`route_category`が`1`の
+  路線が対象。現時点では確認できた範囲（北海道横断自動車道根室線・網走線）
+  のみ収録）
 - `route_numbers.py` — 路線種別区分が`1`〜`4`の路線は国土交通省「高速道路
   ナンバリング一覧」、`5`（指定都市高速道路）の路線は法定路線名に埋め込まれた
   「N号」表記の抽出を出典とする静的対応表（`ROUTE_NUMBERS`辞書、`route_number`
@@ -47,6 +56,9 @@ $ ./pipeline/preprocess/run.sh
   `route_category`（路線種別区分）・`lane_count`（車線数、`N06_010`を整数として
   保持）を保持した `../output/lines.current.geojson` を書き出す。`route_name`が
   `ROUTE_COMMON_NAMES`にヒットする地物には`common_name`（通称名）を付与する。
+  ヒットしない場合、`route_category`が`1`であり始点・終点接合部名が両方
+  付与されている地物については、`ROUTE_COMMON_NAMES_BY_ENDPOINTS`との追加照合
+  により`common_name`を解決する。
   `route_category`が`1`〜`5`かつ`route_name`が`ROUTE_NUMBERS`にヒットする地物
   には、`common_name`の有無にかかわらず`route_number`（路線番号、例：E1・3）を
   付与する（いずれもヒットしない場合は各属性を付与しない）。また、ジオメトリの
@@ -79,4 +91,4 @@ $ ./pipeline/preprocess/run.sh
 
 - OpenSpec Change: `highway-facility-map`, `add-mlit-route-numbering`, `add-joint-based-route-matching`
 - 対応するspec: `openspec/changes/highway-facility-map/specs/highway-tile-pipeline/spec.md`
-- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91） / 2.1, 2.2, 2.3（GitHub Issue #92）
+- tasks.md タスク番号: 2.1, 2.2, 2.3, 2.4, 2.5（GitHub Issue #2） / 2.1, 2.2（GitHub Issue #59） / 1.1, 1.2（GitHub Issue #91） / 2.1, 2.2, 2.3（GitHub Issue #92） / 3.1, 3.2, 3.3（GitHub Issue #93）
