@@ -23,8 +23,8 @@
 
 ## 5. 前処理パイプラインの検証（Issue: #95）
 
-- [ ] 5.1 `pipeline/preprocess/verify_counts.py`を、`start_point_name`・`end_point_name`の付与件数、および追加解決された`common_name`・`route_number`の件数集計を検証できるよう更新する
-- [ ] 5.2 `pipeline/preprocess/run.sh`を実行し、`lines.current.geojson`・`points.current.geojson`を再生成して検証が通ることを確認する
+- [x] 5.1 `pipeline/preprocess/verify_counts.py`を、`start_point_name`・`end_point_name`の付与件数、および追加解決された`common_name`・`route_number`の件数集計を検証できるよう更新する
+- [x] 5.2 `pipeline/preprocess/run.sh`を実行し、`lines.current.geojson`・`points.current.geojson`を再生成して検証が通ることを確認する
 
 ## 6. 路線ポップアップの表示形式変更（Issue: #96）
 
