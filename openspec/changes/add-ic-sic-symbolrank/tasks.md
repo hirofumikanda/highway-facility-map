@@ -5,10 +5,10 @@
 
 ## 2. IC・SICへのsymbolrank付与 (#106)
 
-- [ ] 2.1 `filter_points.py`で、IC・SIC地点が接続する路線地物の法定路線名（`route_name`）の組をグループキーとして算出する（design.md 決定4）
-- [ ] 2.2 グループごとに、1.1で算出した周辺人口の降順順位から`symbolrank`（`2`〜`5`）を算出する（`symbolrank = 2 + floor((r - 1) * 4 / n)`、design.md 決定3）
-- [ ] 2.3 `IC_SIC_SYMBOLRANK_MINZOOM`（`{2: 9, 3: 10, 4: 11, 5: 12}`）を新設し、IC・SICの`symbolrank`から`tippecanoe.minzoom`を導出する（既存の`POINT_TYPE_MINZOOM`のIC・SIC固定値は廃止する、design.md 決定5）
-- [ ] 2.4 JCT・その他の接合部には引き続き`symbolrank`（IC/SIC向け）を付与しない
+- [x] 2.1 `filter_points.py`で、IC・SIC地点が接続する路線地物の法定路線名（`route_name`）の組をグループキーとして算出する（design.md 決定4）
+- [x] 2.2 グループごとに、1.1で算出した周辺人口の降順順位から`symbolrank`（`2`〜`5`）を算出する（`symbolrank = 2 + floor((r - 1) * 4 / n)`、design.md 決定3）
+- [x] 2.3 `IC_SIC_SYMBOLRANK_MINZOOM`（`{2: 9, 3: 10, 4: 11, 5: 12}`）を新設し、IC・SICの`symbolrank`から`tippecanoe.minzoom`を導出する（既存の`POINT_TYPE_MINZOOM`のIC・SIC固定値は廃止する、design.md 決定5）
+- [x] 2.4 JCT・その他の接合部には引き続き`symbolrank`（IC/SIC向け）を付与しない
 
 ## 3. 前処理パイプラインの検証 (#107)
 
