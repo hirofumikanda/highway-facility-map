@@ -12,8 +12,8 @@
 
 ## 3. 前処理パイプラインの検証 (#107)
 
-- [ ] 3.1 `pipeline/preprocess/verify_counts.py`に、IC・SICの`symbolrank`別件数、グループサイズ分布の集計を追加する
-- [ ] 3.2 `pipeline/preprocess/run.sh`を実行し、`points.current.geojson`が期待通り生成され検証が通ることを確認する（実行時間の実測を含む）
+- [x] 3.1 `pipeline/preprocess/verify_counts.py`に、IC・SICの`symbolrank`別件数、グループサイズ分布の集計を追加する
+- [x] 3.2 `pipeline/preprocess/run.sh`を実行し、`points.current.geojson`が期待通り生成され検証が通ることを確認する（実行時間の実測を含む） — 実測: 10m8.807s（design.md Risksの想定「数分〜十数分程度」の範囲内）
 
 ## 4. タイル生成・検証 (#108)
 

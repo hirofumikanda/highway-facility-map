@@ -17,15 +17,31 @@
 伴って変動しうるため、期待値と一致するかのチェックではなく参考情報として
 出力する。
 
-OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank, add-joint-based-route-matching
-tasks.md: 2.5 / 2.2 / 2.1 / 5.1
+IC・SIC（接合部種別`1`・`2`）については、`symbolrank`（`2`〜`5`）別件数に加え、
+接続する法定路線名の組でグループ化した際のグループサイズ分布を検証する
+（add-ic-sic-symbolrank design.md 決定3・決定4）。グループサイズ分布から
+決まる`symbolrank`別件数の期待値は、`filter_points.py`のグループ化ロジック
+（人口に依存しない）を用いて実データから独立に再算出した値であり、周辺人口
+データ自体の値には依存しない。
+
+OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank, add-joint-based-route-matching, add-ic-sic-symbolrank
+tasks.md: 2.5 / 2.2 / 2.1 / 5.1 / 3.1（GitHub Issue #107）
 """
 import json
 import sys
 from collections import Counter
 from pathlib import Path
 
-from filter_points import JCT_SYMBOLRANK_MINZOOM
+from shapely.geometry import shape
+
+from filter_points import (
+    IC_SIC_SYMBOLRANK_MINZOOM,
+    IC_SIC_TYPES,
+    JCT_SYMBOLRANK_MINZOOM,
+    connected_route_names,
+    ic_sic_symbolrank_group_key,
+    load_line_geometries,
+)
 from route_common_names import ROUTE_COMMON_NAMES
 from route_common_names_by_endpoints import ROUTE_COMMON_NAMES_BY_ENDPOINTS
 from route_numbers import ROUTE_NUMBERS
@@ -43,24 +59,35 @@ EXPECTED_POINT_TYPE_COUNTS = {
     "2": 164,  # スマートインターチェンジ
     "4": 33,  # その他の接合部
 }
-# ジャンクション以外の地点種別のminzoomは固定値のまま（add-jct-symbolrank
-# design.md Non-Goals）。ジャンクションのminzoomはsymbolrankから導出される
-# ため、`JCT_SYMBOLRANK_MINZOOM`（filter_points.pyと共通）を参照する。
-EXPECTED_NON_JCT_MINZOOM = {"1": 10, "2": 12, "4": 14}
+# ジャンクション・IC・SIC以外（その他の接合部）のminzoomは固定値のまま
+# （add-jct-symbolrank design.md Non-Goals）。ジャンクション・IC・SICの
+# minzoomはsymbolrankから導出されるため、それぞれ`JCT_SYMBOLRANK_MINZOOM`・
+# `IC_SIC_SYMBOLRANK_MINZOOM`（いずれもfilter_points.pyと共通）を参照する。
+EXPECTED_OTHER_MINZOOM = {"4": 14}
 # ジャンクションのsymbolrank別件数の期待値。245件の実データがほぼ均等な3群に
 # 分かれる閾値で算出したもの（add-jct-symbolrank design.md 決定2）。
 EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 79, 2: 93, 3: 73}
+# IC・SICのグループ数（接続する法定路線名の組でグループ化した数）の期待値、
+# および`symbolrank`別件数の期待値。グループサイズ分布は人口に依存せず接続
+# 路線のみで決まるため（add-ic-sic-symbolrank design.md 決定4）、symbolrank
+# 別件数の期待値（決定3の式から算出される、グループサイズ分布のみに依存する
+# 値）も周辺人口データの値によらず一意に定まる。2,106件の実データから算出。
+EXPECTED_IC_SIC_GROUP_COUNT = 456
+EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 778, 3: 435, 4: 527, 5: 366}
 
 
 def expected_point_minzoom(props):
     """地点地物のtippecanoe.minzoomの期待値を返す。
 
-    ジャンクションはsymbolrankから導出し、それ以外は地点種別ごとの固定値を
-    用いる（add-jct-symbolrank design.md 決定3）。
+    ジャンクション・IC・SICはそれぞれのsymbolrankから導出し、それ以外は
+    地点種別ごとの固定値を用いる（add-jct-symbolrank design.md 決定3、
+    add-ic-sic-symbolrank design.md 決定5）。
     """
     if props["point_type"] == "3":
         return JCT_SYMBOLRANK_MINZOOM.get(props.get("symbolrank"))
-    return EXPECTED_NON_JCT_MINZOOM.get(props["point_type"])
+    if props["point_type"] in IC_SIC_TYPES:
+        return IC_SIC_SYMBOLRANK_MINZOOM.get(props.get("symbolrank"))
+    return EXPECTED_OTHER_MINZOOM.get(props["point_type"])
 
 
 def check(ok_flags, label, actual, expected):
@@ -170,12 +197,50 @@ def main():
             symbolrank_counts.get(rank, 0),
             expected_count,
         )
-    non_jct_with_symbolrank = sum(
+    ic_sic_features = [
+        f for f in points["features"] if f["properties"]["point_type"] in IC_SIC_TYPES
+    ]
+    missing_ic_sic_symbolrank = sum(
+        1 for f in ic_sic_features if "symbolrank" not in f["properties"]
+    )
+    check(ok_flags, "IC・SICのsymbolrank属性の欠落件数", missing_ic_sic_symbolrank, 0)
+    ic_sic_symbolrank_counts = Counter(
+        f["properties"]["symbolrank"]
+        for f in ic_sic_features
+        if "symbolrank" in f["properties"]
+    )
+    for rank, expected_count in EXPECTED_IC_SIC_SYMBOLRANK_COUNTS.items():
+        check(
+            ok_flags,
+            f"IC・SICのsymbolrank={rank}の件数",
+            ic_sic_symbolrank_counts.get(rank, 0),
+            expected_count,
+        )
+
+    line_geometries = load_line_geometries(lines)
+    route_name_candidates = [(geom, route_name) for geom, _, route_name in line_geometries]
+    group_keys = []
+    for f in ic_sic_features:
+        point_geom = shape(f["geometry"])
+        route_names = connected_route_names(point_geom, route_name_candidates)
+        group_keys.append(
+            ic_sic_symbolrank_group_key(route_names, f["properties"]["point_name"])
+        )
+    group_sizes = Counter(group_keys)
+    check(ok_flags, "IC・SICのグループ数", len(group_sizes), EXPECTED_IC_SIC_GROUP_COUNT)
+    group_size_distribution = Counter(group_sizes.values())
+    print(
+        "[INFO] IC・SICのグループサイズ分布（グループサイズ -> グループ数）: "
+        f"{dict(sorted(group_size_distribution.items()))}"
+    )
+
+    other_with_symbolrank = sum(
         1
         for f in points["features"]
-        if f["properties"]["point_type"] != "3" and "symbolrank" in f["properties"]
+        if f["properties"]["point_type"] not in ("3", *IC_SIC_TYPES)
+        and "symbolrank" in f["properties"]
     )
-    check(ok_flags, "ジャンクション以外へのsymbolrank誤付与件数", non_jct_with_symbolrank, 0)
+    check(ok_flags, "その他の接合部へのsymbolrank誤付与件数", other_with_symbolrank, 0)
 
     minzoom_mismatches = sum(
         1
