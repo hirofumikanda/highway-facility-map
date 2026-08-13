@@ -1,7 +1,7 @@
 ## 1. 周辺人口の算出 (#105)
 
-- [ ] 1.1 `pipeline/preprocess/point_population.py`を新設し、`geojson/250m_mesh_2024_GEOJSON/`の94ファイルを1回ずつ読み込みながら、与えられた地点座標群それぞれの半径10km以内メッシュの`PTN_2025`合計をNumPy配列演算で算出する関数を実装する（design.md 決定1・決定2）
-- [ ] 1.2 メッシュ中心点はジオメトリのバウンディングボックス中心から算出し、距離は緯度補正した平面近似式で判定する（design.md 決定2）
+- [x] 1.1 `pipeline/preprocess/point_population.py`を新設し、`geojson/250m_mesh_2024_GEOJSON/`の94ファイルを1回ずつ読み込みながら、与えられた地点座標群それぞれの半径10km以内メッシュの`PTN_2025`合計をNumPy配列演算で算出する関数を実装する（design.md 決定1・決定2）
+- [x] 1.2 メッシュ中心点はジオメトリのバウンディングボックス中心から算出し、距離は緯度補正した平面近似式で判定する（design.md 決定2）
 
 ## 2. IC・SICへのsymbolrank付与 (#106)
 
