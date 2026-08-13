@@ -41,7 +41,7 @@ from pathlib import Path
 
 from shapely.geometry import Point, shape
 
-from filter_points import POINT_TYPE_MINZOOM
+from filter_points import POINT_TYPE_IMPORTANCE_ORDER
 from route_common_names import ROUTE_COMMON_NAMES
 from route_common_names_by_endpoints import ROUTE_COMMON_NAMES_BY_ENDPOINTS
 from route_numbers import ROUTE_NUMBERS
@@ -75,14 +75,14 @@ def endpoint_joint_name(point_geom, joint_geometries):
 
     一致する接合部が存在しない場合は`None`を返す。同一座標に複数の接合部が
     一致する場合、接合部種別の重要度順（ジャンクション＞一般IC＞スマートIC＞
-    その他の接合部、`filter_points.py`の`POINT_TYPE_MINZOOM`と同じ順序）で
+    その他の接合部、`filter_points.py`の`POINT_TYPE_IMPORTANCE_ORDER`）で
     最も重要度の高い接合部を採用する（design.md 決定2）。
     """
     matches = matching_values(point_geom, joint_geometries)
     if not matches:
         return None
     point_type, point_name = min(
-        matches, key=lambda match: POINT_TYPE_MINZOOM[match[0]]
+        matches, key=lambda match: POINT_TYPE_IMPORTANCE_ORDER[match[0]]
     )
     return point_name
 
