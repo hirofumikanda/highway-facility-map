@@ -3,8 +3,9 @@
 
 `tippecanoe-decode` で指定ズームのタイル群をデコードし、以下を確認する:
   - 4.1: z8では地点種別がジャンクション（point_type="3"）のみ収録される
-  - 4.2: z10で一般IC、z12でスマートICが段階的に追加され、
-         より低いズームの収録集合を包含する
+  - 4.2: z9で一般IC・スマートIC（point_type="1"・"2"）が種別を問わず
+         symbolrankに応じて段階的に追加され、より低いズームの収録集合を
+         包含する（add-ic-sic-symbolrank design.md 決定5、下記参照）
   - 4.3: z14では地物数（タイル境界の重複を`id`で除去した一意な数）が
          現況地点数（2,384件）と一致する
   - 4.4: 路線タイルはズーム4〜14の各レベルで生成され、
@@ -20,13 +21,18 @@
     応じて、z8はsymbolrank=1のみ、z9はsymbolrank=1・2、z10は全ジャンクション
     が収録され、各ズームの収録集合はより低いズームの収録集合を包含する
     （add-jct-symbolrank design.md 決定3）
+  - IC・SICは、地物ごとのsymbolrank（2〜5、値が小さいほど上位、種別を
+    問わず接続路線内の周辺人口相対順位で決まる）に応じて、z9は
+    symbolrank=2のみ、z10は2・3、z11は2・3・4、z12は全IC・SIC
+    （symbolrank2〜5すべて）が収録され、各ズームの収録集合はより低い
+    ズームの収録集合を包含する（add-ic-sic-symbolrank design.md 決定5）
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-jct-symbolrank
-tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）, 3.1（add-jct-symbolrank）
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-jct-symbolrank, add-ic-sic-symbolrank
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）, 3.1（add-jct-symbolrank）, 4.1（add-ic-sic-symbolrank、GitHub Issue #108）
 """
 import json
 import subprocess
@@ -44,9 +50,16 @@ PREFECTURE_MIN_ZOOM, PREFECTURE_MAX_ZOOM = 4, 8
 
 # ズームごとに収録されるべき地点種別コードの集合
 # （3: ジャンクション, 1: 一般IC, 2: スマートIC, 4: その他の接合部）
+# IC・SIC（1・2）はsymbolrankに応じてz9〜z12で段階的に収録されるが、
+# 両種別ともsymbolrank=2〜5の地物が存在するため、いずれのズームでも
+# 種別の集合としては{"1", "2"}が揃って現れる
+# （add-ic-sic-symbolrank design.md 決定5、種別ごとの段階的収録は
+# EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOMで別途検証する）。
 EXPECTED_TYPES_BY_ZOOM = {
     8: {"3"},
-    10: {"3", "1"},
+    9: {"3", "1", "2"},
+    10: {"3", "1", "2"},
+    11: {"3", "1", "2"},
     12: {"3", "1", "2"},
     14: {"3", "1", "2", "4"},
 }
@@ -61,6 +74,24 @@ EXPECTED_JCT_SYMBOLRANKS_BY_ZOOM = {
     8: {1},
     9: {1, 2},
     10: {1, 2, 3},
+}
+
+# IC・SICの接合部種別コード（一般インターチェンジ・スマートインターチェンジ）。
+IC_SIC_TYPES = {"1", "2"}
+
+# IC・SICのsymbolrank（2〜5、値が小さいほど上位）別の件数の期待値。
+# 2,106件のIC・SIC実データに基づく（symbolrank算出式がグループサイズ
+# 分布のみに依存するため、周辺人口データの値によらず一意に定まる値。
+# add-ic-sic-symbolrank design.md 決定3・決定4、verify_counts.pyと共通）。
+EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 778, 3: 435, 4: 527, 5: 366}
+
+# ズームごとに収録されるべきIC・SICのsymbolrankの集合
+# （add-ic-sic-symbolrank design.md 決定5）。
+EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOM = {
+    9: {2},
+    10: {2, 3},
+    11: {2, 3, 4},
+    12: {2, 3, 4, 5},
 }
 
 
@@ -162,6 +193,51 @@ def verify_jct_symbolrank(ok_flags):
         previous_ids = ids
 
 
+def verify_ic_sic_symbolrank(ok_flags):
+    """IC・SICがsymbolrankに応じてz9〜z12で段階的に収録されることを確認する。
+
+    z9はsymbolrank=2のみ、z10は2・3、z11は2・3・4、z12は2・3・4・5
+    （全IC・SIC）が収録され、各ズームの収録集合はより低いズームの収録集合を
+    包含する。種別（IC/SIC）を問わずsymbolrankのみで判定する
+    （add-ic-sic-symbolrank design.md 決定5）。
+    """
+    previous_ids = set()
+    for zoom in sorted(EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOM):
+        expected_ranks = EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOM[zoom]
+        features = decode_zoom(POINTS_PMTILES, zoom)
+        ic_sic_symbolrank_by_id = {
+            f["id"]: f["properties"]["symbolrank"]
+            for f in features
+            if f["properties"]["point_type"] in IC_SIC_TYPES
+        }
+        ranks = set(ic_sic_symbolrank_by_id.values())
+
+        check(
+            ok_flags,
+            f"z{zoom}で収録されるIC・SICのsymbolrankの集合",
+            ranks,
+            expected_ranks,
+        )
+
+        expected_count = sum(EXPECTED_IC_SIC_SYMBOLRANK_COUNTS[r] for r in expected_ranks)
+        check(
+            ok_flags,
+            f"z{zoom}で収録されるIC・SICの件数（重複排除後）",
+            len(ic_sic_symbolrank_by_id),
+            expected_count,
+        )
+
+        ids = set(ic_sic_symbolrank_by_id)
+        check(
+            ok_flags,
+            f"z{zoom}のIC・SIC収録集合が下位ズームの集合を包含する"
+            f"（{len(previous_ids)}件 <= {len(ids)}件）",
+            previous_ids <= ids,
+            True,
+        )
+        previous_ids = ids
+
+
 def verify_lines(ok_flags):
     for zoom in range(LINE_MIN_ZOOM, LINE_MAX_ZOOM + 1):
         features = decode_zoom(LINES_PMTILES, zoom)
@@ -252,6 +328,7 @@ def main():
     ok_flags = []
     verify_points(ok_flags)
     verify_jct_symbolrank(ok_flags)
+    verify_ic_sic_symbolrank(ok_flags)
     verify_lines(ok_flags)
     verify_prefectures(ok_flags)
 
