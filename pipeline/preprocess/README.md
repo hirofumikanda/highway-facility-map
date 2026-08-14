@@ -25,6 +25,11 @@
 - [Shapely](https://shapely.readthedocs.io/) — `filter_points.py`が地点と路線の
   空間的な接続判定（頂点一致判定）に使用する。`pip install shapely`（Debian/Ubuntu
   では`apt install python3-shapely`でも可）でインストールする。
+- [NumPy](https://numpy.org/) — `point_population.py`がIC・SIC地点周辺の人口集計
+  （メッシュ座標・人口の配列演算）に使用する。`pip install numpy`でインストールする。
+- 人口メッシュデータ（`geojson/250m_mesh_2024_GEOJSON/`、94ファイル・合計約7.7GB、
+  国土数値情報「250mメッシュ別将来推計人口」、Git管理対象外）— `point_population.py`
+  がIC・SIC地点の半径10km以内人口合計の算出に読み込む。
 
 ## 実行方法
 
