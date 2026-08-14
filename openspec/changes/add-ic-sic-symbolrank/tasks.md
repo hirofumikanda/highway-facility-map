@@ -26,5 +26,5 @@
 
 ## 6. ドキュメント更新・動作確認 (#110)
 
-- [ ] 6.1 `pipeline/preprocess/README.md`に、新設スクリプトの依存関係（NumPy、人口メッシュデータ）を追記する
-- [ ] 6.2 `npx serve site`でローカル動作確認を行う（IC/SICのsymbolrank別表示開始ズーム、人口の多いSICが人口の少ないICより先に表示されること、JCTが常に最優先のままであること、その他の接合部の表示に変化がないことを含む）
+- [x] 6.1 `pipeline/preprocess/README.md`に、新設スクリプトの依存関係（NumPy、人口メッシュデータ）を追記する
+- [x] 6.2 `npx serve site`でローカル動作確認を行う（IC/SICのsymbolrank別表示開始ズーム、人口の多いSICが人口の少ないICより先に表示されること、JCTが常に最優先のままであること、その他の接合部の表示に変化がないことを含む）
