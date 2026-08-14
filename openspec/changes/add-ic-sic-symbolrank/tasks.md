@@ -17,8 +17,8 @@
 
 ## 4. タイル生成・検証 (#108)
 
-- [ ] 4.1 `pipeline/tilegen/verify_tiles.py`に、IC・SICの`symbolrank`別ズーム収録（`z9`は`symbolrank=2`のみ、`z12`以降は全IC・SIC）の検証を追加する
-- [ ] 4.2 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成・配置する
+- [x] 4.1 `pipeline/tilegen/verify_tiles.py`に、IC・SICの`symbolrank`別ズーム収録（`z9`は`symbolrank=2`のみ、`z12`以降は全IC・SIC）の検証を追加する
+- [x] 4.2 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成・配置する
 
 ## 5. 地点名ラベルの表示形式変更 (#109)
 
