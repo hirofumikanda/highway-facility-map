@@ -22,7 +22,7 @@
 
 ## 5. 地点名ラベルの表示形式変更 (#109)
 
-- [ ] 5.1 `site/style/map-style.js`の`point-labels`レイヤーの`symbol-sort-key`を、IC・SICは`symbolrank + 3`（値域5〜8）、その他の接合部は固定値`9`に変更する（design.md 決定6）
+- [x] 5.1 `site/style/map-style.js`の`point-labels`レイヤーの`symbol-sort-key`を、IC・SICは`symbolrank + 3`（値域5〜8）、その他の接合部は固定値`9`に変更する（design.md 決定6）
 
 ## 6. ドキュメント更新・動作確認 (#110)
 
