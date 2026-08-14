@@ -75,6 +75,10 @@ JCT_SYMBOLRANK_MINZOOM = {1: 8, 2: 9, 3: 10}
 # （add-ic-sic-symbolrank design.md 決定5）。
 IC_SIC_SYMBOLRANK_MINZOOM = {2: 9, 3: 10, 4: 11, 5: 12}
 
+# 路線種別区分（route_category）のうち、指定都市高速道路・その他を表すコード
+# （demote-city-other-joints design.md 決定2）。
+CITY_OR_OTHER_ROUTE_CATEGORIES = {"5", "6"}
+
 
 def jct_symbolrank(lane_counts):
     """ジャンクションのsymbolrankを、接続する路線の車線数合計から算出する。
@@ -124,12 +128,13 @@ def assign_ic_sic_symbolranks(entries):
 
 
 def load_line_geometries(lines_source):
-    """路線地物ごとの(ジオメトリ, 車線数, 法定路線名)のリストを構築する。"""
+    """路線地物ごとの(ジオメトリ, 車線数, 法定路線名, 路線種別区分)のリストを構築する。"""
     return [
         (
             shape(feature["geometry"]),
             feature["properties"]["lane_count"],
             feature["properties"]["route_name"],
+            feature["properties"]["route_category"],
         )
         for feature in lines_source["features"]
     ]
@@ -149,9 +154,30 @@ def connected_route_names(point_geom, route_name_candidates):
     return matching_values(point_geom, route_name_candidates)
 
 
+def connected_route_categories(point_geom, route_category_candidates):
+    """地点座標に頂点一致判定で接続する路線地物のroute_categoryの集合を返す。
+
+    接続する路線地物が1件もない場合は空集合を返す
+    （demote-city-other-joints design.md 決定2）。
+    """
+    return set(matching_values(point_geom, route_category_candidates))
+
+
+def is_city_or_other_only(route_categories):
+    """接続する路線のroute_categoryが、指定都市高速道路・その他のみで構成されるかを判定する。
+
+    `route_categories`が空集合（接続する路線地物が1件もない）の場合は`False`を
+    返す（demote-city-other-joints design.md 決定2）。
+    """
+    return bool(route_categories) and route_categories <= CITY_OR_OTHER_ROUTE_CATEGORIES
+
+
 def filter_current_points(source, line_geometries):
-    lane_count_candidates = [(geom, lane_count) for geom, lane_count, _ in line_geometries]
-    route_name_candidates = [(geom, route_name) for geom, _, route_name in line_geometries]
+    lane_count_candidates = [(geom, lane_count) for geom, lane_count, _, _ in line_geometries]
+    route_name_candidates = [(geom, route_name) for geom, _, route_name, _ in line_geometries]
+    route_category_candidates = [
+        (geom, route_category) for geom, _, _, route_category in line_geometries
+    ]
 
     entries = []
     for feature in source["features"]:
