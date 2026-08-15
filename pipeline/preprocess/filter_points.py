@@ -26,8 +26,8 @@ minzoom（8/9/10）を用いる（add-jct-symbolrank design.md 決定1〜3）。
 地点座標とライン地物の座標一致判定は`spatial_match.py`の共通ロジックを用いる
 （add-joint-based-route-matching design.md 決定1）。
 
-OpenSpec Change: highway-facility-map, add-jct-symbolrank, add-joint-based-route-matching, add-ic-sic-symbolrank
-tasks.md: 2.3, 2.4 / 1.1, 1.2 / 1.2 / 2.1, 2.2, 2.3, 2.4（GitHub Issue #106）
+OpenSpec Change: highway-facility-map, add-jct-symbolrank, add-joint-based-route-matching, add-ic-sic-symbolrank, demote-city-other-joints
+tasks.md: 2.3, 2.4 / 1.1, 1.2 / 1.2 / 2.1, 2.2, 2.3, 2.4（GitHub Issue #106） / 1.1-1.3, 2.1-2.4（GitHub Issue #117, #118）
 """
 import json
 from collections import defaultdict
@@ -67,13 +67,15 @@ POINT_TYPE_IMPORTANCE_ORDER = {"3": 0, "1": 1, "2": 2, "4": 3}
 # IC・SICの接合部種別コード（一般インターチェンジ・スマートインターチェンジ）。
 IC_SIC_TYPES = {"1", "2"}
 
-# ジャンクションのsymbolrank（1〜3、値が小さいほど上位）->tippecanoeのminzoom
-# （add-jct-symbolrank design.md 決定3）。
-JCT_SYMBOLRANK_MINZOOM = {1: 8, 2: 9, 3: 10}
+# ジャンクションのsymbolrank（1〜4、値が小さいほど上位。4は指定都市高速道路・
+# その他限定の補正が適用された場合のみ発生する）->tippecanoeのminzoom
+# （add-jct-symbolrank design.md 決定3、demote-city-other-joints design.md 決定3）。
+JCT_SYMBOLRANK_MINZOOM = {1: 8, 2: 9, 3: 10, 4: 11}
 
-# IC・SICのsymbolrank（2〜5、値が小さいほど上位）->tippecanoeのminzoom
-# （add-ic-sic-symbolrank design.md 決定5）。
-IC_SIC_SYMBOLRANK_MINZOOM = {2: 9, 3: 10, 4: 11, 5: 12}
+# IC・SICのsymbolrank（2〜6、値が小さいほど上位。6は指定都市高速道路・その他
+# 限定の補正が適用された場合のみ発生する）->tippecanoeのminzoom
+# （add-ic-sic-symbolrank design.md 決定5、demote-city-other-joints design.md 決定3）。
+IC_SIC_SYMBOLRANK_MINZOOM = {2: 9, 3: 10, 4: 11, 5: 12, 6: 13}
 
 # 路線種別区分（route_category）のうち、指定都市高速道路・その他を表すコード
 # （demote-city-other-joints design.md 決定2）。
@@ -205,6 +207,9 @@ def filter_current_points(source, line_geometries):
 
         if point_type == "3":
             symbolrank = jct_symbolrank(lane_counts)
+            route_categories = connected_route_categories(point_geom, route_category_candidates)
+            if is_city_or_other_only(route_categories):
+                symbolrank += 1
             properties["symbolrank"] = symbolrank
             entry["minzoom"] = JCT_SYMBOLRANK_MINZOOM[symbolrank]
         elif point_type in IC_SIC_TYPES:
@@ -212,6 +217,9 @@ def filter_current_points(source, line_geometries):
             entry["group_key"] = ic_sic_symbolrank_group_key(route_names, point_name)
             entry["point_name"] = point_name
             entry["coordinates"] = (point_geom.x, point_geom.y)
+            entry["route_categories"] = connected_route_categories(
+                point_geom, route_category_candidates
+            )
         else:
             entry["minzoom"] = POINT_TYPE_MINZOOM[point_type]
 
@@ -226,8 +234,11 @@ def filter_current_points(source, line_geometries):
             entry["population"] = population
         assign_ic_sic_symbolranks(ic_sic_entries)
         for entry in ic_sic_entries:
-            entry["properties"]["symbolrank"] = entry["symbolrank"]
-            entry["minzoom"] = IC_SIC_SYMBOLRANK_MINZOOM[entry["symbolrank"]]
+            symbolrank = entry["symbolrank"]
+            if is_city_or_other_only(entry["route_categories"]):
+                symbolrank += 1
+            entry["properties"]["symbolrank"] = symbolrank
+            entry["minzoom"] = IC_SIC_SYMBOLRANK_MINZOOM[symbolrank]
 
     return {
         "type": "FeatureCollection",
