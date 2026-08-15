@@ -6,11 +6,11 @@
 
 ## 2. symbolrank・minzoomの補正 (#118)
 
-- [ ] 2.1 JCTの`symbolrank`算出（`jct_symbolrank`）後に、接続路線の判定結果に基づき`symbolrank += 1`する補正を適用する
-- [ ] 2.2 IC・SICの`assign_ic_sic_symbolranks`によるグループ内四分位算出完了後に、接続路線の判定結果に基づき`symbolrank += 1`する補正を適用する
-- [ ] 2.3 `JCT_SYMBOLRANK_MINZOOM`に`4: 11`を追加する
-- [ ] 2.4 `IC_SIC_SYMBOLRANK_MINZOOM`に`6: 13`を追加する
-- [ ] 2.5 補正後の`symbolrank`を用いて`tippecanoe.minzoom`が決定されることを確認する（既存の辞書引きロジックがそのまま機能することの確認）
+- [x] 2.1 JCTの`symbolrank`算出（`jct_symbolrank`）後に、接続路線の判定結果に基づき`symbolrank += 1`する補正を適用する
+- [x] 2.2 IC・SICの`assign_ic_sic_symbolranks`によるグループ内四分位算出完了後に、接続路線の判定結果に基づき`symbolrank += 1`する補正を適用する
+- [x] 2.3 `JCT_SYMBOLRANK_MINZOOM`に`4: 11`を追加する
+- [x] 2.4 `IC_SIC_SYMBOLRANK_MINZOOM`に`6: 13`を追加する
+- [x] 2.5 補正後の`symbolrank`を用いて`tippecanoe.minzoom`が決定されることを確認する（既存の辞書引きロジックがそのまま機能することの確認）
 
 ## 3. パイプライン実行と前処理検証の更新 (#119)
 
