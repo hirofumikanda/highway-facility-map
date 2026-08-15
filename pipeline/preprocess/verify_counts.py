@@ -218,7 +218,7 @@ def main():
         )
 
     line_geometries = load_line_geometries(lines)
-    route_name_candidates = [(geom, route_name) for geom, _, route_name in line_geometries]
+    route_name_candidates = [(geom, route_name) for geom, _, route_name, _ in line_geometries]
     group_keys = []
     for f in ic_sic_features:
         point_geom = shape(f["geometry"])
