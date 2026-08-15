@@ -9,7 +9,8 @@
 期待値:
   - 現況路線: 1,289件
   - 現況地点: 2,384件（ジャンクション245 / 一般IC1,942 / スマートIC164 / その他33）
-  - ジャンクションのsymbolrank: 1が79件 / 2が93件 / 3が73件
+  - ジャンクションのsymbolrank: 1が59件 / 2が74件 / 3が99件 / 4が13件
+  - IC・SICのsymbolrank: 2が651件 / 3が472件 / 4が514件 / 5が398件 / 6が71件
 
 `start_point_name`・`end_point_name`の付与件数、および始点・終点接合部・
 通称名を用いた追加解決（add-joint-based-route-matching design.md 決定3・
@@ -17,15 +18,18 @@
 伴って変動しうるため、期待値と一致するかのチェックではなく参考情報として
 出力する。
 
-IC・SIC（接合部種別`1`・`2`）については、`symbolrank`（`2`〜`5`）別件数に加え、
-接続する法定路線名の組でグループ化した際のグループサイズ分布を検証する
-（add-ic-sic-symbolrank design.md 決定3・決定4）。グループサイズ分布から
-決まる`symbolrank`別件数の期待値は、`filter_points.py`のグループ化ロジック
+IC・SIC（接合部種別`1`・`2`）については、`symbolrank`（`2`〜`6`。`6`は指定
+都市高速道路・その他にのみ連結する地点への補正が適用された場合のみ発生する）
+別件数に加え、接続する法定路線名の組でグループ化した際のグループサイズ分布を
+検証する（add-ic-sic-symbolrank design.md 決定3・決定4）。グループサイズ分布
+から決まる`symbolrank`別件数の期待値は、`filter_points.py`のグループ化ロジック
 （人口に依存しない）を用いて実データから独立に再算出した値であり、周辺人口
-データ自体の値には依存しない。
+データ自体の値には依存しない。ジャンクション・IC・SICのsymbolrankには、
+指定都市高速道路（`5`）・その他（`6`）にのみ連結する地点への1段階分の補正
+（demote-city-other-joints design.md 決定1）が反映されている。
 
-OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank, add-joint-based-route-matching, add-ic-sic-symbolrank
-tasks.md: 2.5 / 2.2 / 2.1 / 5.1 / 3.1（GitHub Issue #107）
+OpenSpec Change: highway-facility-map, add-mlit-route-numbering, add-jct-symbolrank, add-joint-based-route-matching, add-ic-sic-symbolrank, demote-city-other-joints
+tasks.md: 2.5 / 2.2 / 2.1 / 5.1 / 3.1（GitHub Issue #107） / 3.3（GitHub Issue #119）
 """
 import json
 import sys
@@ -65,15 +69,19 @@ EXPECTED_POINT_TYPE_COUNTS = {
 # `IC_SIC_SYMBOLRANK_MINZOOM`（いずれもfilter_points.pyと共通）を参照する。
 EXPECTED_OTHER_MINZOOM = {"4": 14}
 # ジャンクションのsymbolrank別件数の期待値。245件の実データがほぼ均等な3群に
-# 分かれる閾値で算出したもの（add-jct-symbolrank design.md 決定2）。
-EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 79, 2: 93, 3: 73}
+# 分かれる閾値で算出したもの（add-jct-symbolrank design.md 決定2）。うち、
+# 指定都市高速道路・その他にのみ連結する13件はsymbolrank=4に補正される
+# （demote-city-other-joints design.md 決定1・決定3）。
+EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 59, 2: 74, 3: 99, 4: 13}
 # IC・SICのグループ数（接続する法定路線名の組でグループ化した数）の期待値、
 # および`symbolrank`別件数の期待値。グループサイズ分布は人口に依存せず接続
 # 路線のみで決まるため（add-ic-sic-symbolrank design.md 決定4）、symbolrank
 # 別件数の期待値（決定3の式から算出される、グループサイズ分布のみに依存する
 # 値）も周辺人口データの値によらず一意に定まる。2,106件の実データから算出。
+# うち、指定都市高速道路・その他にのみ連結する71件はsymbolrank=6に補正される
+# （demote-city-other-joints design.md 決定1・決定3）。
 EXPECTED_IC_SIC_GROUP_COUNT = 456
-EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 778, 3: 435, 4: 527, 5: 366}
+EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 651, 3: 472, 4: 514, 5: 398, 6: 71}
 
 
 def expected_point_minzoom(props):
