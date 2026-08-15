@@ -22,10 +22,10 @@
 
 ## 4. タイル生成と収録検証の更新 (#120)
 
-- [ ] 4.1 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成する
-- [ ] 4.2 `pipeline/tilegen/verify_tiles.py`のジャンクションのズーム別収録期待値（z8〜z11）・件数期待値を更新する
-- [ ] 4.3 `pipeline/tilegen/verify_tiles.py`のIC・SICのズーム別収録期待値（z9〜z13）・件数期待値を更新する
-- [ ] 4.4 `pipeline/tilegen/verify_tiles.py`を実行し、全チェックが成功することを確認する
+- [x] 4.1 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成する
+- [x] 4.2 `pipeline/tilegen/verify_tiles.py`のジャンクションのズーム別収録期待値（z8〜z11）・件数期待値を更新する
+- [x] 4.3 `pipeline/tilegen/verify_tiles.py`のIC・SICのズーム別収録期待値（z9〜z13）・件数期待値を更新する
+- [x] 4.4 `pipeline/tilegen/verify_tiles.py`を実行し、全チェックが成功することを確認する
 
 ## 5. ラベル表示スタイルの更新 (#121)
 
