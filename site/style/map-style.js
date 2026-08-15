@@ -429,11 +429,14 @@ export const mapStyle = {
         "text-anchor": "top",
         "text-offset": [0, 0.6],
         // ラベル同士が重なる場合の配置優先順位（値が小さいほど優先される、
-        // MapLibre仕様）。ジャンクションはsymbolrank（1〜3、値が小さいほど
-        // 上位）をそのまま使用する。一般IC・スマートICはsymbolrank（2〜5）に
-        // オフセット3を加えた値（5〜8）を使用し、種別を問わず周辺人口の多い
-        // 地点を優先する。その他の接合部には、JCT・IC/SICの帯と重複しない
-        // 固定値を割り当てる（add-ic-sic-symbolrank design.md 決定6）。
+        // MapLibre仕様）。ジャンクションはsymbolrank（1〜4、値が小さいほど
+        // 上位。4は指定都市高速道路・その他限定の補正が適用された場合のみ
+        // 発生する）をそのまま使用する（値域1〜4）。一般IC・スマートICは
+        // symbolrank（2〜6、6は同様に補正が適用された場合のみ発生する）に
+        // オフセット3を加えた値（値域5〜9）を使用し、種別を問わず周辺人口の
+        // 多い地点を優先する。その他の接合部には、JCT・IC/SICの拡張後の
+        // 値域（1〜9）と重複しない固定値10を割り当てる（add-ic-sic-symbolrank
+        // design.md 決定6、demote-city-other-joints design.md 決定4）。
         "symbol-sort-key": [
           "match",
           ["get", "point_type"],
@@ -441,7 +444,7 @@ export const mapStyle = {
           ["coalesce", ["get", "symbolrank"], 3],
           ["1", "2"],
           ["+", ["get", "symbolrank"], 3],
-          9,
+          10,
         ],
         "text-allow-overlap": false,
         "text-optional": true,
