@@ -14,11 +14,11 @@
 
 ## 3. パイプライン実行と前処理検証の更新 (#119)
 
-- [ ] 3.1 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`を再生成する
-- [ ] 3.2 実データでのJCT・IC・SICのsymbolrank別件数（補正対象・非対象それぞれ）を集計する
-- [ ] 3.3 `pipeline/preprocess/verify_counts.py`のJCT・IC・SICのsymbolrank別件数期待値を、3.2の実データに基づき更新する
-- [ ] 3.4 `pipeline/preprocess/verify_counts.py`の`expected_point_minzoom`が、拡張後の`JCT_SYMBOLRANK_MINZOOM`・`IC_SIC_SYMBOLRANK_MINZOOM`を正しく参照することを確認する
-- [ ] 3.5 `pipeline/preprocess/verify_counts.py`を実行し、全チェックが成功することを確認する
+- [x] 3.1 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`を再生成する
+- [x] 3.2 実データでのJCT・IC・SICのsymbolrank別件数（補正対象・非対象それぞれ）を集計する
+- [x] 3.3 `pipeline/preprocess/verify_counts.py`のJCT・IC・SICのsymbolrank別件数期待値を、3.2の実データに基づき更新する
+- [x] 3.4 `pipeline/preprocess/verify_counts.py`の`expected_point_minzoom`が、拡張後の`JCT_SYMBOLRANK_MINZOOM`・`IC_SIC_SYMBOLRANK_MINZOOM`を正しく参照することを確認する
+- [x] 3.5 `pipeline/preprocess/verify_counts.py`を実行し、全チェックが成功することを確認する
 
 ## 4. タイル生成と収録検証の更新 (#120)
 
