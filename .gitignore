@@ -3,3 +3,4 @@
 *.xml
 /pipeline/output/*.pmtiles
 __pycache__/
+.claude/settings.local.json
