@@ -17,22 +17,26 @@
     地物について、z14でそれらの属性を保持する。両属性は独立に解決される
     ため、route_numberはcommon_nameの有無にかかわらず保持されることを
     確認する（add-mlit-route-numbering design.md 決定2）
-  - ジャンクションは、地物ごとのsymbolrank（1〜3、値が小さいほど上位）に
-    応じて、z8はsymbolrank=1のみ、z9はsymbolrank=1・2、z10は全ジャンクション
-    が収録され、各ズームの収録集合はより低いズームの収録集合を包含する
-    （add-jct-symbolrank design.md 決定3）
-  - IC・SICは、地物ごとのsymbolrank（2〜5、値が小さいほど上位、種別を
-    問わず接続路線内の周辺人口相対順位で決まる）に応じて、z9は
-    symbolrank=2のみ、z10は2・3、z11は2・3・4、z12は全IC・SIC
-    （symbolrank2〜5すべて）が収録され、各ズームの収録集合はより低い
-    ズームの収録集合を包含する（add-ic-sic-symbolrank design.md 決定5）
+  - ジャンクションは、地物ごとのsymbolrank（1〜4、値が小さいほど上位。
+    4は指定都市高速道路・その他限定の補正が適用された場合のみ発生する）に
+    応じて、z8はsymbolrank=1のみ、z9はsymbolrank=1・2、z10は1・2・3、
+    z11は全ジャンクション（symbolrank1〜4すべて）が収録され、各ズームの
+    収録集合はより低いズームの収録集合を包含する（add-jct-symbolrank
+    design.md 決定3、demote-city-other-joints design.md 決定3）
+  - IC・SICは、地物ごとのsymbolrank（2〜6、値が小さいほど上位。6は同様に
+    補正が適用された場合のみ発生する。種別を問わず接続路線内の周辺人口
+    相対順位で決まる）に応じて、z9はsymbolrank=2のみ、z10は2・3、z11は
+    2・3・4、z12は2・3・4・5、z13は全IC・SIC（symbolrank2〜6すべて）が
+    収録され、各ズームの収録集合はより低いズームの収録集合を包含する
+    （add-ic-sic-symbolrank design.md 決定5、demote-city-other-joints
+    design.md 決定3）
 
 タイルには境界付近のバッファにより同一地物が隣接タイルに重複して現れ得る
 ため、地点の集計は`build_points.sh`で付与した`--generate-ids`の`id`で
 重複排除して行う。
 
-OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-jct-symbolrank, add-ic-sic-symbolrank
-tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）, 3.1（add-jct-symbolrank）, 4.1（add-ic-sic-symbolrank、GitHub Issue #108）
+OpenSpec Change: highway-facility-map, map-interactivity-and-basemap, add-route-common-name-jct-lanes, add-mlit-route-numbering, add-jct-symbolrank, add-ic-sic-symbolrank, demote-city-other-joints
+tasks.md: 4.1, 4.2, 4.3, 4.4（highway-facility-map）, 1.4（map-interactivity-and-basemap）, 5.2（add-route-common-name-jct-lanes）, 4.2（add-mlit-route-numbering）, 3.1（add-jct-symbolrank）, 4.1（add-ic-sic-symbolrank、GitHub Issue #108）, 4.2, 4.3（demote-city-other-joints、GitHub Issue #120）
 """
 import json
 import subprocess
@@ -50,48 +54,59 @@ PREFECTURE_MIN_ZOOM, PREFECTURE_MAX_ZOOM = 4, 8
 
 # ズームごとに収録されるべき地点種別コードの集合
 # （3: ジャンクション, 1: 一般IC, 2: スマートIC, 4: その他の接合部）
-# IC・SIC（1・2）はsymbolrankに応じてz9〜z12で段階的に収録されるが、
-# 両種別ともsymbolrank=2〜5の地物が存在するため、いずれのズームでも
+# IC・SIC（1・2）はsymbolrankに応じてz9〜z13で段階的に収録されるが、
+# 両種別ともsymbolrank=2〜6の地物が存在するため、いずれのズームでも
 # 種別の集合としては{"1", "2"}が揃って現れる
-# （add-ic-sic-symbolrank design.md 決定5、種別ごとの段階的収録は
-# EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOMで別途検証する）。
+# （add-ic-sic-symbolrank design.md 決定5、demote-city-other-joints
+# design.md 決定3、種別ごとの段階的収録はEXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOM
+# で別途検証する）。
 EXPECTED_TYPES_BY_ZOOM = {
     8: {"3"},
     9: {"3", "1", "2"},
     10: {"3", "1", "2"},
     11: {"3", "1", "2"},
     12: {"3", "1", "2"},
+    13: {"3", "1", "2"},
     14: {"3", "1", "2", "4"},
 }
 
-# ジャンクションのsymbolrank（1〜3、値が小さいほど上位）別の件数の期待値。
-# 245件のジャンクション実データに基づく（add-jct-symbolrank design.md 決定2）。
-EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 79, 2: 93, 3: 73}
+# ジャンクションのsymbolrank（1〜4、値が小さいほど上位。4は指定都市高速
+# 道路・その他にのみ連結する地点への補正が適用された場合のみ発生する）
+# 別の件数の期待値。245件のジャンクション実データに基づく
+# （add-jct-symbolrank design.md 決定2、demote-city-other-joints
+# design.md 決定1・決定3）。
+EXPECTED_JCT_SYMBOLRANK_COUNTS = {1: 59, 2: 74, 3: 99, 4: 13}
 
 # ズームごとに収録されるべきジャンクションのsymbolrankの集合
-# （add-jct-symbolrank design.md 決定3）。
+# （add-jct-symbolrank design.md 決定3、demote-city-other-joints
+# design.md 決定3）。
 EXPECTED_JCT_SYMBOLRANKS_BY_ZOOM = {
     8: {1},
     9: {1, 2},
     10: {1, 2, 3},
+    11: {1, 2, 3, 4},
 }
 
 # IC・SICの接合部種別コード（一般インターチェンジ・スマートインターチェンジ）。
 IC_SIC_TYPES = {"1", "2"}
 
-# IC・SICのsymbolrank（2〜5、値が小さいほど上位）別の件数の期待値。
-# 2,106件のIC・SIC実データに基づく（symbolrank算出式がグループサイズ
-# 分布のみに依存するため、周辺人口データの値によらず一意に定まる値。
-# add-ic-sic-symbolrank design.md 決定3・決定4、verify_counts.pyと共通）。
-EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 778, 3: 435, 4: 527, 5: 366}
+# IC・SICのsymbolrank（2〜6、値が小さいほど上位。6は指定都市高速道路・
+# その他にのみ連結する地点への補正が適用された場合のみ発生する）別の件数
+# の期待値。2,106件のIC・SIC実データに基づく（symbolrank算出式がグループ
+# サイズ分布のみに依存するため、周辺人口データの値によらず一意に定まる値。
+# add-ic-sic-symbolrank design.md 決定3・決定4、demote-city-other-joints
+# design.md 決定1・決定3、verify_counts.pyと共通）。
+EXPECTED_IC_SIC_SYMBOLRANK_COUNTS = {2: 651, 3: 472, 4: 514, 5: 398, 6: 71}
 
 # ズームごとに収録されるべきIC・SICのsymbolrankの集合
-# （add-ic-sic-symbolrank design.md 決定5）。
+# （add-ic-sic-symbolrank design.md 決定5、demote-city-other-joints
+# design.md 決定3）。
 EXPECTED_IC_SIC_SYMBOLRANKS_BY_ZOOM = {
     9: {2},
     10: {2, 3},
     11: {2, 3, 4},
     12: {2, 3, 4, 5},
+    13: {2, 3, 4, 5, 6},
 }
 
 
