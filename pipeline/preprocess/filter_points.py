@@ -238,6 +238,7 @@ def filter_current_points(source, line_geometries):
             if is_city_or_other_only(entry["route_categories"]):
                 symbolrank += 1
             entry["properties"]["symbolrank"] = symbolrank
+            entry["properties"]["population"] = round(entry["population"])
             entry["minzoom"] = IC_SIC_SYMBOLRANK_MINZOOM[symbolrank]
 
     return {
