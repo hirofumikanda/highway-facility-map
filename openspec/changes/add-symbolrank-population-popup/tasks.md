@@ -1,9 +1,9 @@
 ## 1. 周辺人口の出力属性への追加 (#132)
 
-- [ ] 1.1 `pipeline/preprocess/filter_points.py`のIC・SICの`symbolrank`付与処理に、`entry["population"]`を四捨五入した整数値を`properties["population"]`へ書き込む処理を追加する
-- [ ] 1.2 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`のIC・SIC地物に`population`属性が付与されることを確認する
-- [ ] 1.3 `pipeline/preprocess/verify_counts.py`に、IC・SICの`population`属性の欠落件数検証を追加する
-- [ ] 1.4 `pipeline/preprocess/verify_counts.py`を実行し、全チェックが成功することを確認する
+- [x] 1.1 `pipeline/preprocess/filter_points.py`のIC・SICの`symbolrank`付与処理に、`entry["population"]`を四捨五入した整数値を`properties["population"]`へ書き込む処理を追加する
+- [x] 1.2 `pipeline/preprocess/run.sh`を実行し、`pipeline/output/points.current.geojson`のIC・SIC地物に`population`属性が付与されることを確認する
+- [x] 1.3 `pipeline/preprocess/verify_counts.py`に、IC・SICの`population`属性の欠落件数検証を追加する
+- [x] 1.4 `pipeline/preprocess/verify_counts.py`を実行し、全チェックが成功することを確認する
 
 ## 2. タイルの再生成 (#133)
 

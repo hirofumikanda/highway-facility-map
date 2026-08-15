@@ -224,6 +224,10 @@ def main():
             ic_sic_symbolrank_counts.get(rank, 0),
             expected_count,
         )
+    missing_ic_sic_population = sum(
+        1 for f in ic_sic_features if "population" not in f["properties"]
+    )
+    check(ok_flags, "IC・SICのpopulation属性の欠落件数", missing_ic_sic_population, 0)
 
     line_geometries = load_line_geometries(lines)
     route_name_candidates = [(geom, route_name) for geom, _, route_name, _ in line_geometries]
