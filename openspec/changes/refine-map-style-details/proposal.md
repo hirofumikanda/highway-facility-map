@@ -4,7 +4,7 @@
 
 ## What Changes
 
-- `lines`・`points`・`prefectures`の各PMTilesソースの`attribution`文字列に、出典元（国土数値情報）へのハイパーリンクを追加する。リンク先は国土数値情報ダウンロードサイトのトップページ（`https://nlftp.mlit.go.jp/ksj/`）とする（具体的なデータセットのバージョン別ページはURL構造が変わりうるため、安定したトップページをリンク先とする）。
+- `lines`・`points`・`prefectures`の各PMTilesソースの`attribution`文字列に、出典元（国土数値情報）へのハイパーリンクを追加する。リンク先は、高速道路時系列データ（`lines`・`points`ソース）は当該データセットの個別ページ（`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N06-2025.html`）、行政区域データ（`prefectures`ソース）は当該データセットの個別ページ（`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html`）とする。
 - 路線番号バッジ（矩形・シールド形の両方、`route-number-badges`・`route-number-badges-shield`レイヤー）のラベル文字を、現在の`text-font`（`Klokantech Noto Sans CJK Regular`）から、太字のラテン文字用フォント（`Klokantech Noto Sans Bold`）に変更する。`route_number`属性の値はラテン文字・数字のみ（例：`E1`、`5`）でCJK文字を含まないため、CJK対応フォントは不要（**BREAKING**: 対象レイヤーの`text-font`をCJK対応フォントから非対応フォントに変更するため、`route_number`に将来CJK文字が含まれるようになった場合は文字化けする）。
 - シールド形バッジ（`route-number-badges-shield`レイヤー、指定都市高速道路の路線番号用）のSDF画像生成を、単純な画像全体の伸縮ではなく、伸縮可能な領域と固定領域を区別する仕組み（9-slice、`content`・`stretchX`・`stretchY`のメタデータ）を用いる方式に変更し、路線番号の桁数によらずシールドの上部矩形・下部の先細り形状のプロポーションが大きく崩れないようにする。
 

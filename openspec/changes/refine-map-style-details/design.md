@@ -17,16 +17,15 @@
 
 **Non-Goals:**
 - 矩形バッジ（MLITナンバリング由来）の見た目・生成方式の変更。
-- attribution文字列の文言・データセット別リンク先の作り込み（トップページへの単一リンクで十分とする、決定1参照）。
 - `route_number`以外のラベル（路線名・地点名）のフォント変更。
 
 ## Decisions
 
-### 決定1: attributionのリンク先は、データセット別ページではなく国土数値情報ダウンロードサイトのトップページ（`https://nlftp.mlit.go.jp/ksj/`）とする
-高速道路時系列データ（N06）・行政区域データ（N03）それぞれの個別ダウンロードページのURLはデータセットのバージョン改定に伴って変わりうる（例：`N06-25`のようにバージョン番号がパスに含まれる形式）のに対し、トップページのURLは安定している。出典表示の目的（データの出所を示し、参照可能にすること）は安定したトップページへのリンクで満たせるため、個別ページのURLを本変更内で特定・検証するコストをかけない。
+### 決定1: attributionのリンク先は、国土数値情報ダウンロードサイトの各データセットの個別ページとする
+高速道路時系列データ（`lines`・`points`ソース）は`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N06-2025.html`、行政区域データ（`prefectures`ソース）は`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html`を、それぞれのattribution文字列のリンク先とする。データセット別ページの方が、トップページよりも実際に利用しているデータの詳細（データセットの説明・ダウンロードリンク）に直接到達でき、出典表示の目的（データの出所を示し、参照可能にすること）をより高い精度で満たす。
 
 代替案として検討したが不採用:
-- **各データセットの個別ページへリンクする**: より正確だが、正確なURLの特定にはKSJサイトの実地確認が必要であり、将来のデータセット改定でリンク切れが生じるリスクもある。本変更のスコープ（出典表示にリンクを追加するというUI改善）に対して過剰なため不採用。
+- **国土数値情報ダウンロードサイトのトップページ（`https://nlftp.mlit.go.jp/ksj/`）にリンクする**: URLの安定性は高いが、ユーザーが実際に参照しているデータセットの詳細に到達するには、トップページから改めてナビゲーションする必要があり、出典表示としての利便性に劣るため不採用。
 
 ### 決定2: 路線番号バッジの`text-font`は、CJK対応フォントではなくラテン文字用の太字フォント（`Klokantech Noto Sans Bold`）に変更する
 `route_number`属性の値はすべて英数字であり、CJK文字を表示する必要がない。`glyphs`エンドポイント（`fonts.openmaptiles.org`）がホストするopenmaptiles/fontsのフォントセットには、CJK結合フォントはRegularウェイトのみが含まれ、Boldウェイトの結合フォント（`Klokantech Noto Sans CJK Bold`）は提供されていない一方、ラテン文字用の`Klokantech Noto Sans Bold`は標準的に提供されている（openmaptiles標準スタイルで広く使われているフォントスタック）。CJK文字を含まない`route_number`に対しては、ラテン文字用の太字フォントを直接指定する方が、存在が確認できないCJK太字フォント名に依存するより確実である。
@@ -46,10 +45,11 @@
 
 - [Risk] `content`・`stretchX`・`stretchY`の具体的なピクセル範囲は、実装時に実機（ブラウザ）でシールド形状の見た目を確認しながら調整が必要になる（設計段階では方式のみを決定する） → tasks.mdで、複数の桁数の路線番号を含む実データでの目視確認を明示的なタスクとする。
 - [Trade-off] `route_number`バッジの`text-font`をCJK非対応フォントに変更するため、将来`route_number`にCJK文字が含まれるデータが追加された場合は文字化けする（**BREAKING**、proposal.md参照）。現状のデータ（MLITナンバリング・指定都市高速道路の独自番号）はいずれも英数字のみであり、この制約は許容範囲とする。
+- [Trade-off] attributionのリンク先をデータセット別ページ（`KsjTmplt-N06-2025`・`KsjTmplt-N03-2026`）としたため、国土数値情報側でデータセットのバージョンが更新されURLが変わった場合はリンク切れが生じうる。現時点の最新バージョンへのリンクとし、将来のバージョン更新時は本Changeとは別に更新する。
 
 ## Migration Plan
 
-1. `site/style/map-style.js`の`lines`・`points`・`prefectures`各ソースの`attribution`文字列に、`https://nlftp.mlit.go.jp/ksj/`へのリンク（`target="_blank"`・`rel="noopener noreferrer"`）を含める（決定1）。
+1. `site/style/map-style.js`の`lines`・`points`ソースの`attribution`文字列に`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N06-2025.html`へ、`prefectures`ソースの`attribution`文字列に`https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html`へのリンク（`target="_blank"`・`rel="noopener noreferrer"`）をそれぞれ含める（決定1）。
 2. `ROUTE_NUMBER_BADGE_LAYOUT_BASE`の`text-font`を`["Klokantech Noto Sans Bold"]`に変更する（決定2）。
 3. `buildRouteNumberBadgeShieldImageData`または`registerRouteNumberBadgeShieldImage`を、`content`・`stretchX`・`stretchY`を算出・付与するように変更する（決定3）。
 4. `npx serve site`でローカル動作確認（attributionのリンクが機能すること、路線番号ラベルが太字で表示されること、1桁・2桁の路線番号を持つ指定都市高速道路のシールドバッジの形状が大きく崩れていないことを含む）を行う。
