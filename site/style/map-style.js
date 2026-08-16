@@ -151,8 +151,11 @@ const ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO = 0.6;
 const ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X_HALF_WIDTH = 2;
 
 // 9-sliceのテキスト配置領域（content）の、上部矩形部分内側への余白（px）。
-const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_X = 4;
-const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_Y = 3;
+// テキスト自体の余白は`icon-text-fit-padding`側で確保されるため、ここでは
+// 余白を追加せず矩形部分の全域をcontentとする（余白を追加するとcontentが
+// 小さくなり、テキストに合わせてアイコン全体が余分に拡大されてしまう）。
+const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_X = 0;
+const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_Y = 0;
 
 function buildRouteNumberBadgeShieldImageData(size, rectRatio) {
   const data = new Uint8Array(size * size * 4);
