@@ -145,6 +145,15 @@ const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE = 32;
 // シールド上部（矩形部分）の高さの割合。残り（下部）は中央へ向けて先細りする。
 const ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO = 0.6;
 
+// 9-sliceの伸縮可能領域（stretchX）の、画像中央から左右対称の半幅（px）。
+// 中央付近の限られた帯のみを対象とすることで、上部矩形の左右端・下部の
+// 先細り形状の輪郭（伸縮領域の外側にある）は伸縮させない（design.md 決定3）。
+const ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X_HALF_WIDTH = 2;
+
+// 9-sliceのテキスト配置領域（content）の、上部矩形部分内側への余白（px）。
+const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_X = 4;
+const ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_Y = 3;
+
 function buildRouteNumberBadgeShieldImageData(size, rectRatio) {
   const data = new Uint8Array(size * size * 4);
   const rectBottomY = size * rectRatio;
@@ -170,18 +179,35 @@ export function registerRouteNumberBadgeShieldImage(map) {
   if (map.hasImage(ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID)) {
     return;
   }
+  const size = ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE;
   const data = buildRouteNumberBadgeShieldImageData(
-    ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
+    size,
     ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO,
   );
+  const centerX = (size - 1) / 2;
+  const rectBottomY = size * ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO;
+  // stretchYは指定しない。バッジの高さはテキスト行数に依存せずほぼ一定の
+  // ため、高さ方向の9-slice制御は不要（design.md 決定3）。
+  const stretchX = [
+    [
+      centerX - ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X_HALF_WIDTH,
+      centerX + ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X_HALF_WIDTH,
+    ],
+  ];
+  const content = [
+    ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_X,
+    ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_Y,
+    size - ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_X,
+    rectBottomY - ROUTE_NUMBER_BADGE_SHIELD_CONTENT_PADDING_Y,
+  ];
   map.addImage(
     ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID,
     {
-      width: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
-      height: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
+      width: size,
+      height: size,
       data,
     },
-    { sdf: true },
+    { sdf: true, content, stretchX },
   );
 }
 

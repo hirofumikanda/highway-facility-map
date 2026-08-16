@@ -10,9 +10,9 @@
 
 ## 3. シールド形バッジの9-slice対応 (#145)
 
-- [ ] 3.1 `buildRouteNumberBadgeShieldImageData`の画像設計（32×32、上部60%矩形・下部40%先細り）を踏まえ、水平方向の伸縮可能領域（`stretchX`）を中央付近の限られた帯に限定するピクセル範囲を決定する
-- [ ] 3.2 テキスト配置領域（`content`）を、上部矩形部分の内側に定義する
-- [ ] 3.3 `registerRouteNumberBadgeShieldImage`の`map.addImage`呼び出しに、算出した`content`・`stretchX`（`stretchY`は指定しない）を`{sdf: true}`とあわせてオプションとして渡すよう変更する
+- [x] 3.1 `buildRouteNumberBadgeShieldImageData`の画像設計（32×32、上部60%矩形・下部40%先細り）を踏まえ、水平方向の伸縮可能領域（`stretchX`）を中央付近の限られた帯に限定するピクセル範囲を決定する
+- [x] 3.2 テキスト配置領域（`content`）を、上部矩形部分の内側に定義する
+- [x] 3.3 `registerRouteNumberBadgeShieldImage`の`map.addImage`呼び出しに、算出した`content`・`stretchX`（`stretchY`は指定しない）を`{sdf: true}`とあわせてオプションとして渡すよう変更する
 
 ## 4. 動作確認 (#146)
 
