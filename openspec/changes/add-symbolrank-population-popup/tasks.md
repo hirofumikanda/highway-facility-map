@@ -11,8 +11,8 @@
 
 ## 3. ポップアップへの表示追加 (#134)
 
-- [ ] 3.1 `site/main.js`の`points`クリックハンドラに、`feature.properties.symbolrank`が存在する場合に`symbolrank: <値>`を表示する行を追加する
-- [ ] 3.2 `site/main.js`の`points`クリックハンドラに、`feature.properties.population`が存在する場合に`周辺人口: <値>人（半径10km以内）`（3桁区切り表示）を表示する行を追加する
+- [x] 3.1 `site/main.js`の`points`クリックハンドラに、`feature.properties.symbolrank`が存在する場合に`symbolrank: <値>`を表示する行を追加する
+- [x] 3.2 `site/main.js`の`points`クリックハンドラに、`feature.properties.population`が存在する場合に`周辺人口: <値>人（半径10km以内）`（3桁区切り表示）を表示する行を追加する
 
 ## 4. 動作確認 (#135)
 
