@@ -59,7 +59,7 @@ const map = new Map({
 map.addControl(new NavigationControl(), "top-right");
 
 // route-number-badges（矩形バッジ）・route-number-badges-shield（シールド
-// バッジ）レイヤーが参照するSDF画像は、実行時に`map.addImage`で登録する
+// バッジ）レイヤーが参照する画像は、実行時に`map.addImage`で登録する
 // 必要があるため、styleの読み込み完了後に登録する
 // （design.md 決定3、fix-route-number-badges design.md 決定3）。
 map.on("load", () => {
