@@ -199,7 +199,7 @@ const ROUTE_NUMBER_BADGE_LAYOUT_BASE = {
   "icon-text-fit": "both",
   "icon-text-fit-padding": [2, 4, 2, 4],
   "text-field": ["get", "route_number"],
-  "text-font": ["Klokantech Noto Sans CJK Regular"],
+  "text-font": ["Klokantech Noto Sans Bold"],
   "text-size": ["interpolate", ["linear"], ["zoom"], 8, 9, 14, 12],
   "text-letter-spacing": 0.02,
   "icon-allow-overlap": false,

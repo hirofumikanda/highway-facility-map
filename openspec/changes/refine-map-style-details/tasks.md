@@ -6,7 +6,7 @@
 
 ## 2. 路線番号ラベルの太字化 (#144)
 
-- [ ] 2.1 `ROUTE_NUMBER_BADGE_LAYOUT_BASE`の`text-font`を`["Klokantech Noto Sans CJK Regular"]`から`["Klokantech Noto Sans Bold"]`に変更する
+- [x] 2.1 `ROUTE_NUMBER_BADGE_LAYOUT_BASE`の`text-font`を`["Klokantech Noto Sans CJK Regular"]`から`["Klokantech Noto Sans Bold"]`に変更する
 
 ## 3. シールド形バッジの9-slice対応 (#145)
 
