@@ -91,7 +91,7 @@ map.on("click", "points", (event) => {
   }
 
   const coordinates = feature.geometry.coordinates.slice();
-  const { point_name, point_type, lane_counts } = feature.properties;
+  const { point_name, point_type, lane_counts, symbolrank, population } = feature.properties;
 
   const container = document.createElement("div");
   const nameEl = document.createElement("div");
@@ -108,6 +108,20 @@ map.on("click", "points", (event) => {
     const laneEl = document.createElement("div");
     laneEl.textContent = `車線数: ${laneCounts.join(", ")}`;
     container.append(laneEl);
+  }
+
+  // symbolrank・populationはジャンクション・一般IC・SICのみに付与される
+  // ため、属性が存在する場合のみ行を表示する（design.md 決定2）。
+  if (symbolrank !== undefined) {
+    const symbolrankEl = document.createElement("div");
+    symbolrankEl.textContent = `symbolrank: ${symbolrank}`;
+    container.append(symbolrankEl);
+  }
+
+  if (population !== undefined) {
+    const populationEl = document.createElement("div");
+    populationEl.textContent = `周辺人口: ${population.toLocaleString("ja-JP")}人（半径10km以内）`;
+    container.append(populationEl);
   }
 
   showPopup(coordinates, container);
