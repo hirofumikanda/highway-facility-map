@@ -23,5 +23,5 @@
 
 ## 5. デプロイ (#136)
 
-- [ ] 5.1 `pipeline/**`・`site/**`の変更を`main`にpushし、`site/**`分の既存GitHub Actionsによる自動デプロイを確認する
-- [ ] 5.2 再生成した`site/tiles/points.pmtiles`が配置されていることを手動で確認する
+- [x] 5.1 `pipeline/**`・`site/**`の変更を`main`にpushし、`site/**`分の既存GitHub Actionsによる自動デプロイを確認する
+- [x] 5.2 再生成した`site/tiles/points.pmtiles`が配置されていることを手動で確認する
