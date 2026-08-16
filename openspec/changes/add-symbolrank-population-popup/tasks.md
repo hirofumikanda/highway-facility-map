@@ -7,7 +7,7 @@
 
 ## 2. タイルの再生成 (#133)
 
-- [ ] 2.1 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成する
+- [x] 2.1 `./pipeline/build.sh`を実行し、`site/tiles/points.pmtiles`を再生成する
 
 ## 3. ポップアップへの表示追加 (#134)
 
