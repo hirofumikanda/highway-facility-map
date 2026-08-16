@@ -129,60 +129,38 @@ export function registerRouteNumberBadgeImage(map) {
   );
 }
 
-// route-number-badges-shieldレイヤーの`icon-image`として参照するSDF画像のID。
+// route-number-badges-shieldレイヤーの`icon-image`として参照する画像のID。
 // MLITナンバリング一覧に由来しない路線番号（指定都市高速道路等、
 // route_categoryが5）のバッジに使う（fix-route-number-badges design.md 決定3）。
 export const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID = "route-number-badge-shield";
 
-// シールド形バッジ用のSDF画像を生成し、`map.addImage`でスタイルに登録する。
-// 矩形バッジ（全ピクセル255の一様画像）と異なり、画像内にシールド形状の
-// 2値マスク（上部は矩形、下部は中央に向けて先細りする盾形）を描く。矩形化と
-// 同様に境界のアンチエイリアシングは行わず、内側255／外側0の2値とする。
-// 矩形バッジで1x1画像がSDFサンプリングの縁評価に失敗した経緯を踏まえ、
-// 十分な解像度（32x32）を使用する（fix-route-number-badges design.md 決定3）。
-const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE = 32;
+// シールド形バッジの背景画像（32x31）。ROUTE_NUMBER_BADGE_COLORで塗り済みの
+// PNGアセットで、上部が丸みを帯びた矩形、下部が中央へ向けて先細りする盾形。
+const ROUTE_NUMBER_BADGE_SHIELD_IMAGE_URL = new URL(
+  "../img/shield.png",
+  import.meta.url,
+).href;
 
-// シールド上部（矩形部分）の高さの割合。残り（下部）は中央へ向けて先細りする。
-const ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO = 0.6;
+// 9-sliceの伸縮可能領域（stretchX/stretchY）。
+const ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X = [[4, 26]];
+const ROUTE_NUMBER_BADGE_SHIELD_STRETCH_Y = [[4, 22]];
 
-function buildRouteNumberBadgeShieldImageData(size, rectRatio) {
-  const data = new Uint8Array(size * size * 4);
-  const rectBottomY = size * rectRatio;
-  const centerX = (size - 1) / 2;
-  const maxHalfWidth = size / 2;
-  for (let y = 0; y < size; y++) {
-    const taperProgress = Math.max(0, y - rectBottomY) / (size - 1 - rectBottomY);
-    const halfWidth = y < rectBottomY ? maxHalfWidth : maxHalfWidth * (1 - taperProgress);
-    for (let x = 0; x < size; x++) {
-      const inside = Math.abs(x - centerX) <= halfWidth;
-      const value = inside ? 255 : 0;
-      const pixelIndex = (y * size + x) * 4;
-      data[pixelIndex] = value;
-      data[pixelIndex + 1] = value;
-      data[pixelIndex + 2] = value;
-      data[pixelIndex + 3] = value;
-    }
-  }
-  return data;
-}
+// 9-sliceのテキスト配置領域（content）。
+const ROUTE_NUMBER_BADGE_SHIELD_CONTENT = [4, 4, 26, 22];
 
 export function registerRouteNumberBadgeShieldImage(map) {
   if (map.hasImage(ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID)) {
-    return;
+    return Promise.resolve();
   }
-  const data = buildRouteNumberBadgeShieldImageData(
-    ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
-    ROUTE_NUMBER_BADGE_SHIELD_RECT_RATIO,
-  );
-  map.addImage(
-    ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID,
-    {
-      width: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
-      height: ROUTE_NUMBER_BADGE_SHIELD_IMAGE_SIZE,
-      data,
-    },
-    { sdf: true },
-  );
+  return map.loadImage(ROUTE_NUMBER_BADGE_SHIELD_IMAGE_URL).then(({ data }) => {
+    map.addImage(ROUTE_NUMBER_BADGE_SHIELD_IMAGE_ID, data, {
+      content: ROUTE_NUMBER_BADGE_SHIELD_CONTENT,
+      stretchX: ROUTE_NUMBER_BADGE_SHIELD_STRETCH_X,
+      stretchY: ROUTE_NUMBER_BADGE_SHIELD_STRETCH_Y,
+      textFitWidth: "stretchOnly",
+      textFitHeight: "proportional",
+    });
+  });
 }
 
 // 矩形バッジ・シールドバッジ両レイヤーで共通のlayout/paint。`icon-image`と
@@ -400,6 +378,7 @@ export const mapStyle = {
       type: "symbol",
       source: "lines",
       "source-layer": "lines",
+      minzoom: 10,
       filter: ["all", ["has", "route_number"], ["==", ["get", "route_category"], "5"]],
       layout: {
         ...ROUTE_NUMBER_BADGE_LAYOUT_BASE,
