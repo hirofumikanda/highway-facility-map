@@ -1,8 +1,8 @@
 ## 1. attributionへのリンク追加
 
-- [ ] 1.1 `site/style/map-style.js`の`lines`ソースの`attribution`文字列に、`https://nlftp.mlit.go.jp/ksj/`へのリンク（`target="_blank"`・`rel="noopener noreferrer"`）を追加する
-- [ ] 1.2 `points`ソースの`attribution`文字列に同様のリンクを追加する
-- [ ] 1.3 `prefectures`ソースの`attribution`文字列に同様のリンクを追加する
+- [x] 1.1 `site/style/map-style.js`の`lines`ソースの`attribution`文字列に、`https://nlftp.mlit.go.jp/ksj/`へのリンク（`target="_blank"`・`rel="noopener noreferrer"`）を追加する
+- [x] 1.2 `points`ソースの`attribution`文字列に同様のリンクを追加する
+- [x] 1.3 `prefectures`ソースの`attribution`文字列に同様のリンクを追加する
 
 ## 2. 路線番号ラベルの太字化
 
